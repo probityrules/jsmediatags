@@ -1419,6 +1419,42 @@ frameReaderFunctions['PCNT'] = function readCounterFrame(offset, length, data, f
 
 frameReaderFunctions['CNT'] = frameReaderFunctions['PCNT'];
 
+frameReaderFunctions['SYLT'] = function readSynchronizedLyricsFrame(offset, length, data, flags, id3header) {
+  var start = offset;
+  var contentTypes = ['other', 'lyrics', 'transcription', 'movement', 'events', 'chord', 'trivia'];
+  var timeStampFormats = ['unset', 'frames', 'milliseconds'];
+  var charset = getTextEncoding(data.getByteAt(offset));
+  offset += 1;
+  var language = data.getStringAt(offset, 3);
+  offset += 3;
+  var timeStampFormat = timeStampFormats[data.getByteAt(offset)];
+  offset += 1;
+  var contentType = contentTypes[data.getByteAt(offset)];
+  offset += 1;
+  var descriptor = data.getStringWithCharsetAt(offset, length + start - offset, charset);
+  offset += descriptor.bytesReadCount;
+  var synchronisedText = [];
+  var line = '';
+
+  while (offset < length + start) {
+    line = data.getStringWithCharsetAt(offset, length + start - offset, charset);
+    offset += line.bytesReadCount;
+    synchronisedText.push({
+      text: line.toString(),
+      timeStamp: data.getSynchsafeInteger32At(offset)
+    });
+    offset += 4;
+  }
+
+  return {
+    language: language,
+    timeStampFormat: timeStampFormat,
+    contentType: contentType,
+    descriptor: descriptor.toString(),
+    synchronisedText: synchronisedText
+  };
+};
+
 frameReaderFunctions['T*'] = function readTextFrame(offset, length, data, flags, id3header) {
   var charset = getTextEncoding(data.getByteAt(offset));
   return data.getStringWithCharsetAt(offset + 1, length - 1, charset).toString();
