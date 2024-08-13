@@ -1441,7 +1441,7 @@ frameReaderFunctions['SYLT'] = function readSynchronizedLyricsFrame(offset, leng
     offset += line.bytesReadCount;
     synchronisedText.push({
       text: line.toString(),
-      timeStamp: data.getSynchsafeInteger32At(offset)
+      timeStamp: data.getLongAt(offset, true)
     });
     offset += 4;
   }
