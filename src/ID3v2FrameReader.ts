@@ -1,22 +1,22 @@
-/**
- * @flow
- */
 'use strict';
 
-var MediaFileReader = require('./MediaFileReader');
+const MediaFileReader = require('./MediaFileReader');
 const StringUtils = require('./StringUtils');
-var ArrayFileReader = require('./ArrayFileReader');
+const ArrayFileReader = require('./ArrayFileReader');
+
+type MediaReader = InstanceType<typeof MediaFileReader>;
 
 import type {
   CharsetType,
   FrameReaderSignature,
   TagHeader,
   TagFrames,
+  TagFrame,
   TagFrameHeader,
   TagFrameFlags
 } from './FlowTypes';
 
-const FRAME_DESCRIPTIONS = {
+const FRAME_DESCRIPTIONS: Record<string, string> = {
   // v2.2
   "BUF" : "Recommended buffer size",
   "CNT" : "Play counter",
@@ -176,15 +176,13 @@ const FRAME_DESCRIPTIONS = {
 };
 
 class ID3v2FrameReader {
-  static getFrameReaderFunction(frameId: string): ?FrameReaderSignature {
+  static getFrameReaderFunction(frameId: string): FrameReaderSignature | null {
     if (frameId in frameReaderFunctions) {
-      return frameReaderFunctions[frameId];
+      return frameReaderFunctions[frameId] ?? null;
     } else if (frameId[0] === "T") {
-      // All frame ids starting with T are text tags.
-      return frameReaderFunctions["T*"];
+      return frameReaderFunctions["T*"] ?? null;
     } else if (frameId[0] === "W") {
-      // All frame ids starting with W are url tags.
-      return frameReaderFunctions["W*"];
+      return frameReaderFunctions["W*"] ?? null;
     } else {
       return null;
     }
@@ -204,11 +202,11 @@ class ID3v2FrameReader {
   static readFrames(
     offset: number,
     end: number,
-    data: MediaFileReader,
+    data: MediaReader,
     id3header: TagHeader,
-    tags: ?Array<string>
+    tags?: Array<string> | null
   ): TagFrames {
-    var frames = {};
+    const frames: TagFrames = {};
     var frameHeaderSize = this._getFrameHeaderSize(id3header);
     // console.log('header', id3header);
     while (
@@ -248,7 +246,6 @@ class ID3v2FrameReader {
         break;
       }
 
-      var unsyncData;
       if (flags && flags.format.unsynchronisation && !id3header.flags.unsynchronisation) {
         frameData = this.getUnsyncFileReader(frameData, frameDataOffset, frameSize);
         frameDataOffset = 0;
@@ -264,7 +261,15 @@ class ID3v2FrameReader {
       }
 
       var readFrameFunc = ID3v2FrameReader.getFrameReaderFunction(frameId);
-      var parsedData = readFrameFunc ? readFrameFunc.apply(this, [frameDataOffset, frameSize, frameData, flags, id3header]) : null;
+      var parsedData = readFrameFunc
+        ? readFrameFunc.apply(this, [
+            frameDataOffset,
+            frameSize,
+            frameData,
+            (flags as unknown as Record<string, unknown> | null) ?? null,
+            id3header,
+          ])
+        : null;
       var desc = this._getFrameDescription(frameId);
 
       var frame = {
@@ -274,11 +279,12 @@ class ID3v2FrameReader {
         data: parsedData
       };
 
-      if( frameId in frames ) {
-        if( frames[frameId].id ) {
-          frames[frameId] = [frames[frameId]];
+      if (frameId in frames) {
+        const existing = frames[frameId];
+        if (existing && !Array.isArray(existing) && existing.id) {
+          frames[frameId] = [existing];
         }
-        frames[frameId].push(frame);
+        (frames[frameId] as TagFrame[]).push(frame);
       } else {
         frames[frameId] = frame;
       }
@@ -300,7 +306,7 @@ class ID3v2FrameReader {
   }
 
   static _readFrameHeader(
-    data: MediaFileReader,
+    data: MediaReader,
     offset: number,
     id3header: TagHeader
   ): TagFrameHeader {
@@ -308,21 +314,24 @@ class ID3v2FrameReader {
     var flags = null;
     var frameHeaderSize = this._getFrameHeaderSize(id3header);
 
+    let frameId = "";
+    let frameSize = 0;
+
     switch (major) {
       case 2:
-      var frameId = data.getStringAt(offset, 3);
-      var frameSize = data.getInteger24At(offset+3, true);
-      break;
+        frameId = data.getStringAt(offset, 3);
+        frameSize = data.getInteger24At(offset + 3, true);
+        break;
 
       case 3:
-      var frameId = data.getStringAt(offset, 4);
-      var frameSize = data.getLongAt(offset+4, true);
-      break;
+        frameId = data.getStringAt(offset, 4);
+        frameSize = data.getLongAt(offset + 4, true);
+        break;
 
       case 4:
-      var frameId = data.getStringAt(offset, 4);
-      var frameSize = data.getSynchsafeInteger32At(offset+4);
-      break;
+        frameId = data.getStringAt(offset, 4);
+        frameSize = data.getSynchsafeInteger32At(offset + 4);
+        break;
     }
 
     if (
@@ -348,7 +357,7 @@ class ID3v2FrameReader {
     };
   }
 
-  static _readFrameFlags(data: MediaFileReader, offset: number): TagFrameFlags {
+  static _readFrameFlags(data: MediaReader, offset: number): TagFrameFlags {
     return {
       message: {
         tag_alter_preservation  : data.isBitSetAt(offset, 6),
@@ -374,10 +383,10 @@ class ID3v2FrameReader {
   }
 
   static getUnsyncFileReader(
-    data: MediaFileReader,
+    data: MediaReader,
     offset: number,
     size: number
-  ): MediaFileReader {
+  ): MediaReader {
     var frameData = data.getBytesAt(offset, size);
     for (var i = 0; i < frameData.length - 1; i++) {
       if (frameData[i] === 0xff && frameData[i+1] === 0x00) {
@@ -387,33 +396,36 @@ class ID3v2FrameReader {
 
     return new ArrayFileReader(frameData);
   }
-};
+}
 
-var frameReaderFunctions = {};
+const frameReaderFunctions = {} as Record<string, FrameReaderSignature>;
 
 frameReaderFunctions['APIC'] = function readPictureFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   var start = offset;
   var charset = getTextEncoding(data.getByteAt(offset));
+  let format: string;
   switch (id3header && id3header.major) {
     case 2:
-    var format = data.getStringAt(offset+1, 3);
-    offset += 4;
-    break;
+      format = data.getStringAt(offset + 1, 3);
+      offset += 4;
+      break;
 
     case 3:
-    case 4:
-    var format = data.getStringWithCharsetAt(offset+1, length - 1);
-    offset += 1 + format.bytesReadCount;
-    break;
+    case 4: {
+      const fmt = data.getStringWithCharsetAt(offset + 1, length - 1);
+      format = fmt.toString();
+      offset += 1 + fmt.bytesReadCount;
+      break;
+    }
 
     default:
-    throw new Error("Couldn't read ID3v2 major version.");
+      throw new Error("Couldn't read ID3v2 major version.");
   }
   var bite = data.getByteAt(offset);
   var type = PICTURE_TYPE[bite];
@@ -422,7 +434,7 @@ frameReaderFunctions['APIC'] = function readPictureFrame(
   offset += 1 + desc.bytesReadCount;
 
   return {
-    "format" : format.toString(),
+    "format" : format,
     "type" : type,
     "description" : desc.toString(),
     "data" : data.getBytesAt(offset, (start+length) - offset)
@@ -433,12 +445,12 @@ frameReaderFunctions['APIC'] = function readPictureFrame(
 frameReaderFunctions['CHAP'] = function readChapterFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   var originalOffset = offset;
-  var result = {};
+  var result: Record<string, unknown> = {};
   var id = StringUtils.readNullTerminatedString(data.getBytesAt(offset, length));
   result.id = id.toString();
   offset += id.bytesReadCount;
@@ -452,7 +464,13 @@ frameReaderFunctions['CHAP'] = function readChapterFrame(
   offset+=4;
 
   var remainingLength = length - (offset - originalOffset);
-  result.subFrames = this.readFrames(offset, offset + remainingLength, data, id3header);
+  result.subFrames = ID3v2FrameReader.readFrames(
+    offset,
+    offset + remainingLength,
+    data,
+    id3header as TagHeader,
+    undefined
+  );
   return result;
 };
 
@@ -460,12 +478,21 @@ frameReaderFunctions['CHAP'] = function readChapterFrame(
 frameReaderFunctions['CTOC'] = function readTableOfContentsFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   var originalOffset = offset;
-  var result = { childElementIds: [], id: undefined, topLevel: undefined, ordered: undefined, entryCount: undefined, subFrames: undefined };
+  var result: {
+    childElementIds: string[];
+    id?: string;
+    topLevel?: boolean;
+    ordered?: boolean;
+    entryCount?: number;
+    subFrames?: TagFrames;
+  } = {
+    childElementIds: [],
+  };
   var id = StringUtils.readNullTerminatedString(data.getBytesAt(offset, length));
   result.id = id.toString();
   offset += id.bytesReadCount;
@@ -474,22 +501,29 @@ frameReaderFunctions['CTOC'] = function readTableOfContentsFrame(
   offset++;
   result.entryCount = data.getByteAt(offset);
   offset++;
-  for (var i = 0; i < result.entryCount; i++) {
+  const entryCount = result.entryCount as number;
+  for (var i = 0; i < entryCount; i++) {
     var childId = StringUtils.readNullTerminatedString(data.getBytesAt(offset, length - (offset - originalOffset)));
     result.childElementIds.push(childId.toString());
     offset += childId.bytesReadCount;
   }
 
   var remainingLength = length - (offset - originalOffset);
-  result.subFrames = this.readFrames(offset, offset + remainingLength, data, id3header);
+  result.subFrames = ID3v2FrameReader.readFrames(
+    offset,
+    offset + remainingLength,
+    data,
+    id3header as TagHeader,
+    undefined
+  );
   return result;
 }
 
 frameReaderFunctions['COMM'] = function readCommentsFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   var start = offset;
@@ -512,8 +546,8 @@ frameReaderFunctions['COM'] = frameReaderFunctions['COMM'];
 frameReaderFunctions['PIC'] = function(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   return frameReaderFunctions['APIC'](offset, length, data, flags, id3header);
@@ -522,8 +556,8 @@ frameReaderFunctions['PIC'] = function(
 frameReaderFunctions['PCNT'] = function readCounterFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   // FIXME: implement the rest of the spec
@@ -535,8 +569,8 @@ frameReaderFunctions['CNT'] = frameReaderFunctions['PCNT'];
 frameReaderFunctions['SYLT'] = function readSynchronizedLyricsFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   var start = offset;
@@ -553,10 +587,9 @@ frameReaderFunctions['SYLT'] = function readSynchronizedLyricsFrame(
   var descriptor = data.getStringWithCharsetAt(offset, length + start - offset, charset);
   offset += descriptor.bytesReadCount;
   var synchronisedText = [];
-  var line = '';
 
   while (offset < length + start) {
-    line = data.getStringWithCharsetAt(offset, length + start - offset, charset);
+    const line = data.getStringWithCharsetAt(offset, length + start - offset, charset);
     offset += line.bytesReadCount;
     synchronisedText.push({
       text : line.toString(),
@@ -577,8 +610,8 @@ frameReaderFunctions['SYLT'] = function readSynchronizedLyricsFrame(
 frameReaderFunctions['T*'] = function readTextFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   var charset = getTextEncoding(data.getByteAt(offset));
@@ -589,10 +622,10 @@ frameReaderFunctions['T*'] = function readTextFrame(
 frameReaderFunctions['TXXX'] = function readTextFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
-): Object {
+): Record<string, string> {
   var charset = getTextEncoding(data.getByteAt(offset));
 
   return getUserDefinedFields(offset, length, data, charset);
@@ -601,10 +634,10 @@ frameReaderFunctions['TXXX'] = function readTextFrame(
 frameReaderFunctions['WXXX'] = function readUrlFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
-): ?Object {
+): Record<string, unknown> | null {
   if (length === 0) {
     return null;
   }
@@ -615,10 +648,10 @@ frameReaderFunctions['WXXX'] = function readUrlFrame(
 frameReaderFunctions['W*'] = function readUrlFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
-): ?string {
+): string | null {
   if (length === 0) {
     return null;
   }
@@ -628,11 +661,12 @@ frameReaderFunctions['W*'] = function readUrlFrame(
 frameReaderFunctions['TCON'] = function readGenreFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object
+  data: MediaReader,
+  flags: Record<string, unknown> | null
 ): any {
-  var text = frameReaderFunctions['T*'].apply(this, arguments);
-  return (text: string).replace(/^\(\d+\)/, '');
+  const fn = frameReaderFunctions["T*"];
+  var text = fn.apply(this, arguments as unknown as Parameters<FrameReaderSignature>);
+  return (text as string).replace(/^\(\d+\)/, '');
 };
 
 frameReaderFunctions['TCO'] = frameReaderFunctions['TCON'];
@@ -640,8 +674,8 @@ frameReaderFunctions['TCO'] = frameReaderFunctions['TCON'];
 frameReaderFunctions['USLT'] = function readLyricsFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   var start = offset;
@@ -664,8 +698,8 @@ frameReaderFunctions['ULT'] = frameReaderFunctions['USLT'];
 frameReaderFunctions['UFID'] = function readLyricsFrame(
   offset: number,
   length: number,
-  data: MediaFileReader,
-  flags: ?Object,
+  data: MediaReader,
+  flags: Record<string, unknown> | null,
   id3header?: TagHeader
 ): any {
   var ownerIdentifier =
@@ -681,8 +715,8 @@ frameReaderFunctions['UFID'] = function readLyricsFrame(
   };
 };
 
-function getTextEncoding(bite): CharsetType {
-  var charset: ?CharsetType;
+function getTextEncoding(bite: number): CharsetType {
+  var charset: CharsetType | null;
 
   switch (bite)
   {
@@ -714,9 +748,9 @@ function getTextEncoding(bite): CharsetType {
 function getUserDefinedFields(
   offset: number,
   length: number,
-  data: MediaFileReader,
+  data: MediaReader,
   charset: CharsetType
-): Object {
+): Record<string, string> {
   var userDesc = data.getStringWithCharsetAt(offset + 1, length - 1, charset);
   var userDefinedData = data.getStringWithCharsetAt(offset + 1 + userDesc.bytesReadCount, length - 1 - userDesc.bytesReadCount, charset);
 
@@ -726,7 +760,7 @@ function getUserDefinedFields(
   };
 }
 
-var PICTURE_TYPE = [
+const PICTURE_TYPE = [
   "Other",
   "32x32 pixels 'file icon' (PNG only)",
   "Other file icon",
@@ -750,4 +784,4 @@ var PICTURE_TYPE = [
   "Publisher/Studio logotype"
 ];
 
-module.exports = ID3v2FrameReader;
+export = ID3v2FrameReader;

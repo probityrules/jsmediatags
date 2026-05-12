@@ -1,7 +1,9 @@
+/** @jest-environment jsdom */
+
 jest
-  .dontMock('../BlobFileReader.js')
-  .dontMock('../MediaFileReader.js')
-  .dontMock('../ChunkedFileData.js');
+  .dontMock('../BlobFileReader')
+  .dontMock('../MediaFileReader')
+  .dontMock('../ChunkedFileData');
 
 var BlobFileReader = require('../BlobFileReader');
 

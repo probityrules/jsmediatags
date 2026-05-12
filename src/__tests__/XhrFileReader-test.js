@@ -1,8 +1,10 @@
+/** @jest-environment jsdom */
+
 jest
   .mock('xhr2')
-  .dontMock('../XhrFileReader.js')
-  .dontMock('../MediaFileReader.js')
-  .dontMock('../ChunkedFileData.js');
+  .dontMock('../XhrFileReader')
+  .dontMock('../MediaFileReader')
+  .dontMock('../ChunkedFileData');
 
 var XhrFileReader = require('../XhrFileReader');
 
@@ -62,7 +64,7 @@ describe("XhrFileReader", function() {
     expect(XhrFileReader.canReadFile(new Blob())).toBe(false);
   });
 
-  var describeFileSizeTests = function(avoidHeadRequests: boolean) {
+  var describeFileSizeTests = function(avoidHeadRequests) {
     describe("file size with" + avoidHeadRequests ? 'GET' : 'HEAD', function() {
       beforeEach(function() {
         XhrFileReader.setConfig({

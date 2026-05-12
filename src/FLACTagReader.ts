@@ -1,4 +1,7 @@
-var MediaTagReader = require('./MediaTagReader');
+const MediaTagReader = require('./MediaTagReader');
+const MediaFileReader = require('./MediaFileReader');
+
+type MediaReader = InstanceType<typeof MediaFileReader>;
 
 /* The first 4 bytes of a FLAC file describes the header for the file. If these
  * bytes respectively read "fLaC", we can determine it is a FLAC file.
@@ -61,8 +64,8 @@ import type {
  * Class representing a MediaTagReader that parses FLAC tags.
  */
 class FLACTagReader extends MediaTagReader {
-  _commentOffset: number;
-  _pictureOffset: number;
+  _commentOffset?: number;
+  _pictureOffset?: number;
 
   /**
    * Gets the byte range for the tag identifier.
@@ -105,7 +108,7 @@ class FLACTagReader extends MediaTagReader {
    * @param {MediaFileReader} mediaFileReader - The MediaFileReader used to parse the file.
    * @param {LoadCallbackType} callbacks - The callback to call once _loadData is completed.
    */
-  _loadData(mediaFileReader: MediaFileReader, callbacks: LoadCallbackType) {
+  _loadData(mediaFileReader: MediaReader, callbacks: LoadCallbackType) {
     var self = this;
     mediaFileReader.loadRange([4, 7], {
       onSuccess: function() {
@@ -135,7 +138,7 @@ class FLACTagReader extends MediaTagReader {
    * @param {LoadCallbackType} callbacks - The callback to call once the header has been found.
    */
   _loadBlock(
-    mediaFileReader: MediaFileReader,
+    mediaFileReader: MediaReader,
     offset: number,
     callbacks: LoadCallbackType
   ) {
@@ -202,7 +205,7 @@ class FLACTagReader extends MediaTagReader {
    * @param {LoadCallbackType} callbacks - The callback functions to be called.
    */
   _nextBlock(
-    mediaFileReader: MediaFileReader,
+    mediaFileReader: MediaReader,
     offset: number,
     blockHeader: number,
     blockSize: number,
@@ -211,10 +214,12 @@ class FLACTagReader extends MediaTagReader {
     var self = this;
     if (blockHeader > 127) {
       if (!self._commentOffset) {
-        callbacks.onError({
-          "type": "loadData",
-          "info": "Comment block could not be found."
-        });
+        if (callbacks.onError) {
+          callbacks.onError({
+            type: "loadData",
+            info: "Comment block could not be found.",
+          });
+        }
       } else {
         callbacks.onSuccess();
       }
@@ -247,9 +252,10 @@ class FLACTagReader extends MediaTagReader {
    * @param {Array<string>} [tags] - Optional tags to also be retrieved from the file.
    * @return {TagType} - An object containing the tag information for the file.
    */
-  _parseData(data: MediaFileReader, tags: ?Array<string>): TagType {
-    var vendorLength = data.getLongAt(this._commentOffset, false);
-    var offsetVendor = this._commentOffset + 4;
+  _parseData(data: MediaReader, _tags: Array<string> | null): TagType {
+    const commentOffset = this._commentOffset as number;
+    var vendorLength = data.getLongAt(commentOffset, false);
+    var offsetVendor = commentOffset + 4;
     /* This line is able to retrieve the vendor string that the VorbisComment block
      * contains. However, it is not part of the tags that JSMediaTags normally retrieves,
      * and is therefore commented out.
@@ -314,7 +320,7 @@ class FLACTagReader extends MediaTagReader {
       var offsetDataLength = offsetDescription + descriptionLength + 16;
       var dataLength = data.getLongAt(offsetDataLength, true);
       var offsetData = offsetDataLength + 4;
-      var imageData = data.getBytesAt(offsetData, dataLength, true);
+      var imageData = data.getBytesAt(offsetData, dataLength);
       picture = {
         format: mime,
         type: IMAGE_TYPES[imageType],
@@ -327,16 +333,16 @@ class FLACTagReader extends MediaTagReader {
       type: "FLAC",
       version: "1",
       tags: {
-        "title": title,
-        "artist": artist,
-        "album": album,
-        "track": track,
-        "genre": genre,
-        "picture": picture
-      }
-    }
-    return tag;
+        title: title,
+        artist: artist,
+        album: album,
+        track: track,
+        genre: genre,
+        picture: picture,
+      },
+    };
+    return tag as TagType;
   }
 }
 
-module.exports = FLACTagReader;
+export = FLACTagReader;

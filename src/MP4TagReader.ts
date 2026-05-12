@@ -1,24 +1,16 @@
-/**
- * Support for iTunes-style m4a tags
- * See:
- *   http://atomicparsley.sourceforge.net/mpeg-4files.html
- *   http://developer.apple.com/mac/library/documentation/QuickTime/QTFF/Metadata/Metadata.html
- * Authored by Joshua Kifer <joshua.kifer gmail.com>
- * @flow
- */
 'use strict';
 
-var MediaTagReader = require('./MediaTagReader');
-var MediaFileReader = require('./MediaFileReader');
+const MediaTagReader = require('./MediaTagReader');
+const MediaFileReader = require('./MediaFileReader');
 
 import type {
-  CallbackType,
   LoadCallbackType,
-  CharsetType,
   ByteRange,
   TagType,
   TagFrame
 } from './FlowTypes';
+
+type MediaReader = InstanceType<typeof MediaFileReader>;
 
 class MP4TagReader extends MediaTagReader {
   static getTagIdentifierByteRange(): ByteRange {
@@ -36,7 +28,7 @@ class MP4TagReader extends MediaTagReader {
     return id === "ftyp";
   }
 
-  _loadData(mediaFileReader: MediaFileReader, callbacks: LoadCallbackType) {
+  _loadData(mediaFileReader: MediaReader, callbacks: LoadCallbackType) {
     // MP4 metadata isn't located in a specific location of the file. Roughly
     // speaking, it's composed of blocks chained together like a linked list.
     // These blocks are called atoms (or boxes).
@@ -60,7 +52,7 @@ class MP4TagReader extends MediaTagReader {
   }
 
   _loadAtom(
-    mediaFileReader: MediaFileReader,
+    mediaFileReader: MediaReader,
     offset: number,
     parentAtomFullName: string,
     callbacks: LoadCallbackType
@@ -116,38 +108,41 @@ class MP4TagReader extends MediaTagReader {
     return atomName !== "----";
   }
 
-  _parseData(data: MediaFileReader, tagsToRead: ?Array<string>): TagType {
-    var tags = {};
+  _parseData(data: MediaReader, tagsToRead: Array<string> | null): TagType {
+    const tags: Record<string, unknown> = {};
 
     tagsToRead = this._expandShortcutTags(tagsToRead);
     this._readAtom(tags, data, 0, data.getSize(), tagsToRead);
 
-    // create shortcuts for most common data.
-    for (var name in SHORTCUTS) if (SHORTCUTS.hasOwnProperty(name)) {
-      var tag = tags[SHORTCUTS[name]];
-      if (tag) {
-        if (name === "track") {
-          tags[name] = tag.data.track;
-        } else {
-          tags[name] = tag.data;
+    for (const name in SHORTCUTS) {
+      if (SHORTCUTS.hasOwnProperty(name)) {
+        const raw = tags[SHORTCUTS[name as keyof typeof SHORTCUTS]];
+        const tag = raw as TagFrame | undefined;
+        if (tag) {
+          if (name === "track") {
+            const td = tag.data as { track?: unknown };
+            tags[name] = td.track;
+          } else {
+            tags[name] = tag.data;
+          }
         }
       }
     }
 
     return {
-      "type": "MP4",
-      "ftyp": data.getStringAt(8, 4),
-      "version": data.getLongAt(12, true),
-      "tags": tags
-    };
+      type: "MP4",
+      ftyp: data.getStringAt(8, 4),
+      version: data.getLongAt(12, true),
+      tags: tags,
+    } as TagType;
   }
 
   _readAtom(
-    tags: Object,
-    data: MediaFileReader,
+    tags: Record<string, unknown>,
+    data: MediaReader,
     offset: number,
     length: number,
-    tagsToRead: ?Array<string>,
+    tagsToRead: Array<string> | null,
     parentAtomFullName?: string,
     indent?: string
   ) {
@@ -184,7 +179,7 @@ class MP4TagReader extends MediaTagReader {
     }
   }
 
-  _readMetadataAtom(data: MediaFileReader, offset: number): TagFrame {
+  _readMetadataAtom(data: MediaReader, offset: number): TagFrame {
     // 16: size + name + size + "data" (4 bytes each)
     // 8: 1 byte atom version & 3 bytes atom flags + 4 bytes NULL space
     // 8: 4 bytes track + 4 bytes total
@@ -194,76 +189,80 @@ class MP4TagReader extends MediaTagReader {
     var atomName = data.getStringAt(offset + 4, 4);
 
     var klass = data.getInteger24At(offset + METADATA_HEADER + 1, true);
-    var type = TYPES[klass];
-    var atomData;
+    let type: string | undefined = (TYPES as Record<string, string>)[
+      String(klass)
+    ];
+    let atomData: TagFrame["data"];
     var bigEndian = true;
     if (atomName == "trkn") {
       atomData = {
-        "track": data.getShortAt(offset + METADATA_HEADER + 10, bigEndian),
-        "total": data.getShortAt(offset + METADATA_HEADER + 14, bigEndian)
+        track: data.getShortAt(offset + METADATA_HEADER + 10, bigEndian),
+        total: data.getShortAt(offset + METADATA_HEADER + 14, bigEndian),
       };
     } else if (atomName == "disk") {
       atomData = {
-        "disk": data.getShortAt(offset + METADATA_HEADER + 10, bigEndian),
-        "total": data.getShortAt(offset + METADATA_HEADER + 14, bigEndian)
+        disk: data.getShortAt(offset + METADATA_HEADER + 10, bigEndian),
+        total: data.getShortAt(offset + METADATA_HEADER + 14, bigEndian),
       };
     } else {
-      // 4: atom version (1 byte) + atom flags (3 bytes)
-      // 4: NULL (usually locale indicator)
       var atomHeader = METADATA_HEADER + 4 + 4;
       var dataStart = offset + atomHeader;
       var dataLength = atomSize - atomHeader;
-      var atomData;
 
-      // Workaround for covers being parsed as 'uint8' type despite being an 'covr' atom
-      if (atomName === 'covr' && type === 'uint8') {
-        type = 'jpeg'
+      if (atomName === "covr" && type === "uint8") {
+        type = "jpeg";
       }
 
       switch (type) {
         case "text":
-        atomData = data.getStringWithCharsetAt(dataStart, dataLength, "utf-8").toString();
-        break;
+          atomData = data
+            .getStringWithCharsetAt(dataStart, dataLength, "utf-8")
+            .toString();
+          break;
 
         case "uint8":
-        atomData = data.getShortAt(dataStart, false);
-        break;
-        
+          atomData = data.getShortAt(dataStart, false);
+          break;
+
         case "int":
-        case "uint":
-        // Though the QuickTime spec doesn't state it, there are 64-bit values
-        // such as plID (Playlist/Collection ID). With its single 64-bit floating
-        // point number type, these are hard to parse and pass in JavaScript.
-        // The high word of plID seems to always be zero, so, as this is the
-        // only current 64-bit atom handled, it is parsed from its 32-bit
-        // low word as an unsigned long.
-        //
-        var intReader = type == 'int'
-                          ? ( dataLength == 1 ? data.getSByteAt :
-                              dataLength == 2 ? data.getSShortAt :
-                              dataLength == 4 ? data.getSLongAt :
-                                                data.getLongAt)
-                          : ( dataLength == 1 ? data.getByteAt :
-                              dataLength == 2 ? data.getShortAt :
-                                                data.getLongAt);
-        // $FlowFixMe - getByteAt doesn't receive a second argument
-        atomData = intReader.call(data, dataStart + (dataLength == 8 ? 4 : 0), true);
-        break;
+        case "uint": {
+          const intReader =
+            type == "int"
+              ? dataLength == 1
+                ? data.getSByteAt
+                : dataLength == 2
+                  ? data.getSShortAt
+                  : dataLength == 4
+                    ? data.getSLongAt
+                    : data.getLongAt
+              : dataLength == 1
+                ? data.getByteAt
+                : dataLength == 2
+                  ? data.getShortAt
+                  : data.getLongAt;
+          atomData = intReader.call(
+            data,
+            dataStart + (dataLength == 8 ? 4 : 0),
+            true
+          ) as number;
+          break;
+        }
 
         case "jpeg":
         case "png":
-        atomData = {
-          "format": "image/" + type,
-          "data": data.getBytesAt(dataStart, dataLength)
-        };
-        break;
+          atomData = {
+            format: "image/" + type,
+            data: data.getBytesAt(dataStart, dataLength),
+          };
+          break;
       }
     }
 
     return {
       id: atomName,
       size: atomSize,
-      description: ATOM_DESCRIPTIONS[atomName] || "Unknown",
+      description:
+        (ATOM_DESCRIPTIONS as Record<string, string>)[atomName] || "Unknown",
       data: atomData
     };
   }
@@ -336,10 +335,6 @@ const ATOM_DESCRIPTIONS = {
   "flvr": "Codec Flavor"
 };
 
-const UNSUPPORTED_ATOMS = {
-  "----": 1,
-};
-
 const SHORTCUTS = {
   "title"     : "©nam",
   "artist"    : "©ART",
@@ -352,4 +347,4 @@ const SHORTCUTS = {
   "lyrics"    : "©lyr"
 };
 
-module.exports = MP4TagReader;
+export = MP4TagReader;

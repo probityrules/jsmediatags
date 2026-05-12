@@ -1,5 +1,5 @@
 jest
-  .dontMock('../MediaTagReader.js');
+  .dontMock('../MediaTagReader');
 
 const MediaTagReader = require('../MediaTagReader');
 const MediaFileReader = require('../MediaFileReader');

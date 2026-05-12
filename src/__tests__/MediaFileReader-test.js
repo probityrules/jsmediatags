@@ -1,6 +1,6 @@
 jest
-  .dontMock('../MediaFileReader.js')
-  .dontMock('../StringUtils.js');
+  .dontMock('../MediaFileReader')
+  .dontMock('../StringUtils');
 
 var MediaFileReader = require('../MediaFileReader');
 

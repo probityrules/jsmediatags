@@ -1,14 +1,3 @@
-/**
- * This is only used for testing, but could be used for other purposes as
- * writing.
- *
- * http://id3.org/id3v2-00
- * http://id3.org/id3v2.3.0
- * http://id3.org/id3v2.4.0-structure
- *
- * TODO: Padding and Footer
- * @flow
- */
 'use strict';
 
 const ByteArrayUtils = require('./ByteArrayUtils');
@@ -35,18 +24,14 @@ import type {
 } from './FlowTypes';
 
 class ID3v2TagContents {
-  _size: number;
+  _size!: number;
   _major: number;
   _revision: number;
   _contents: ByteArray;
-  _frames: {[key: string]: Array<ByteArray>};
-  _extendedHeader: {
-    UPDATE: number,
-    CRC: number,
-    RESTRICTIONS: number
-  };
-  _hasExtendedHeader: boolean;
-  _nextFrameOffset: number;
+  _frames: { [key: string]: Array<ByteArray> };
+  _extendedHeader: Record<string, number>;
+  _hasExtendedHeader!: boolean;
+  _nextFrameOffset!: number;
 
   constructor(major: number, revision: number) {
     if (major < 2 || major > 4) {
@@ -55,19 +40,18 @@ class ID3v2TagContents {
 
     this._major = major;
     this._revision = revision;
-    this._contents = [].concat(
+    this._contents = ([] as ByteArray).concat(
       bin("ID3"),
       [major, revision],
-      [0], // flags
-      [0, 0, 0, 0] // size
+      [0],
+      [0, 0, 0, 0]
     );
     this._frames = {};
     this._updateSize();
     this._extendedHeader = {
-      // key: length
-      'UPDATE': 0,
-      'CRC': 0,
-      'RESTRICTIONS': 0
+      UPDATE: 0,
+      CRC: 0,
+      RESTRICTIONS: 0,
     };
   }
 
@@ -79,12 +63,16 @@ class ID3v2TagContents {
     return this._updateFlags(flags, 0);
   }
 
-  _updateFlags(flags: TagHeaderFlags, binaryFlags?: number): ID3v2TagContents {
+  _updateFlags(flags: Partial<TagHeaderFlags>, binaryFlags?: number): ID3v2TagContents {
     if (typeof binaryFlags !== 'number') {
       binaryFlags = this._contents[FLAGS] || 0;
     }
 
-    function setOrUnsetBit(shouldSet, bitmap, bit) {
+    function setOrUnsetBit(
+      shouldSet: boolean,
+      bitmap: number,
+      bit: number
+    ): number {
       if (shouldSet) {
         return bitmap |= 1<<bit;
       } else {
@@ -259,14 +247,14 @@ class ID3v2TagContents {
         frameFlags[0] |= (flags.message.read_only ? 1 : 0) << 5;
         frameFlags[1] |= (flags.format.compression ? 1 : 0) << 7;
         frameFlags[1] |= (flags.format.encryption ? 1 : 0) << 6;
-        frameFlags[1] |= (flags.format.grouping_identify ? 1 : 0) << 5;
+        frameFlags[1] |= (flags.format.grouping_identity ? 1 : 0) << 5;
       }
     } else if (this._major === 4) {
       if (flags) {
         frameFlags[0] |= (flags.message.tag_alter_preservation ? 1 : 0) << 6;
         frameFlags[0] |= (flags.message.file_alter_preservation ? 1 : 0) << 5;
         frameFlags[0] |= (flags.message.read_only ? 1 : 0) << 4;
-        frameFlags[1] |= (flags.format.grouping_identify ? 1 : 0) << 6;
+        frameFlags[1] |= (flags.format.grouping_identity ? 1 : 0) << 6;
         frameFlags[1] |= (flags.format.compression ? 1 : 0) << 3;
         frameFlags[1] |= (flags.format.encryption ? 1 : 0) << 2;
         frameFlags[1] |= (flags.format.unsynchronisation ? 1 : 0) << 1;
@@ -280,13 +268,13 @@ class ID3v2TagContents {
       throw Error("Major version not supported");
     }
 
-    var frame = [].concat(
+    var frame = ([] as ByteArray).concat(
       bin(id),
       size,
       frameFlags,
       flags && flags.format.data_length_indicator && noFlagsDataLength
         ? getSynchsafeInteger32(noFlagsDataLength)
-        : [],
+        : ([] as ByteArray),
       data
     );
     if (!this._frames[id]) {
@@ -319,14 +307,14 @@ class ID3v2TagContents {
       }
     }
 
-    var data = [tagData.length].concat(tagData);
+    var data = ([] as ByteArray).concat([tagData.length], tagData);
     this._extendedHeader[tagKey] = data.length;
     this._addData(offset, data);
   }
 
   _initExtendedHeader() {
     this._hasExtendedHeader = true;
-    this._updateFlags({extended_header: true});
+    this._updateFlags({ extended_header: true });
 
     if (this._major === 3) {
       this._addData(EXTENDED_HEADER, [
@@ -335,11 +323,10 @@ class ID3v2TagContents {
         0, 0, 0, 0 // padding
       ]);
     } else if (this._major === 4) {
-      this._addData(EXTENDED_HEADER, [].concat(
-        getSynchsafeInteger32(6), // size
-        [1], // number of flag bytes
-        [0] // extended flags
-      ));
+      this._addData(
+        EXTENDED_HEADER,
+        ([] as ByteArray).concat(getSynchsafeInteger32(6), [1], [0])
+      );
     } else {
       throw new Error("Version doesn't support extended header.");
     }
@@ -385,18 +372,12 @@ class ID3v2TagContents {
   }
 
   _setData(offset: number, data: ByteArray) {
-    this._contents.splice.apply(this._contents, [
-      offset,
-      data.length,
-    ].concat(data));
+    this._contents.splice(offset, data.length, ...data);
   }
 
   _addData(offset: number, data: ByteArray) {
-    this._contents.splice.apply(this._contents, [
-      offset,
-      0,
-    ].concat(data));
+    this._contents.splice(offset, 0, ...data);
   }
 }
 
-module.exports = ID3v2TagContents;
+export = ID3v2TagContents;
