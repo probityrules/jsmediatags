@@ -66,6 +66,70 @@ describe("jsmediatags", function() {
     });
   });
 
+  it("should read tags when read() is called without callbacks", function() {
+    NodeFileReader.canReadFile.mockReturnValue(true);
+    ID3v2TagReader.canReadTagFormat.mockReturnValue(true);
+    ID3v2TagReader.prototype.read = jest.fn()
+      .mockImplementation(function(callbacks) {
+        callbacks.onSuccess(mockTags);
+      });
+
+    var p = jsmediatags.read("fakefile");
+    jest.runAllTimers();
+    return expect(p).resolves.toBe(mockTags);
+  });
+
+  it("should read tags with readAsync", function() {
+    NodeFileReader.canReadFile.mockReturnValue(true);
+    ID3v2TagReader.canReadTagFormat.mockReturnValue(true);
+    ID3v2TagReader.prototype.read = jest.fn()
+      .mockImplementation(function(callbacks) {
+        callbacks.onSuccess(mockTags);
+      });
+
+    var p = jsmediatags.readAsync("fakefile");
+    jest.runAllTimers();
+    return expect(p).resolves.toBe(mockTags);
+  });
+
+  it("should read tags with Reader.prototype.read() without callbacks", function() {
+    NodeFileReader.canReadFile.mockReturnValue(true);
+    ID3v2TagReader.canReadTagFormat.mockReturnValue(true);
+    ID3v2TagReader.prototype.read = jest.fn()
+      .mockImplementation(function(callbacks) {
+        callbacks.onSuccess(mockTags);
+      });
+
+    var p = new jsmediatags.Reader("fakefile").read();
+    jest.runAllTimers();
+    return expect(p).resolves.toBe(mockTags);
+  });
+
+  it("should read tags with Reader.prototype.readAsync", function() {
+    NodeFileReader.canReadFile.mockReturnValue(true);
+    ID3v2TagReader.canReadTagFormat.mockReturnValue(true);
+    ID3v2TagReader.prototype.read = jest.fn()
+      .mockImplementation(function(callbacks) {
+        callbacks.onSuccess(mockTags);
+      });
+
+    var p = new jsmediatags.Reader("fakefile").readAsync();
+    jest.runAllTimers();
+    return expect(p).resolves.toBe(mockTags);
+  });
+
+  it("should reject readAsync when no tag reader is found", function() {
+    NodeFileReader.canReadFile.mockReturnValue(true);
+    ID3v2TagReader.canReadTagFormat.mockReturnValue(false);
+
+    var p = jsmediatags.readAsync("fakefile");
+    jest.runAllTimers();
+    return expect(p).rejects.toMatchObject({
+      type: "tagFormat",
+      info: "No suitable tag reader found",
+    });
+  });
+
   describe("file readers", function() {
     it("should use the given file reader", function() {
       var reader = new jsmediatags.Reader();

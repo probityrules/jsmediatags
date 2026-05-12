@@ -10,7 +10,12 @@ const ID3v2TagReader = require("./ID3v2TagReader");
 const MP4TagReader = require("./MP4TagReader");
 const FLACTagReader = require("./FLACTagReader");
 
-import type { CallbackType, LoadCallbackType, ByteRange } from "./FlowTypes";
+import type {
+  CallbackType,
+  LoadCallbackType,
+  ByteRange,
+  TagType,
+} from "./FlowTypes";
 
 type MediaFileReaderClass = typeof MediaFileReader;
 
@@ -24,8 +29,20 @@ type TagReaderResolutionCallbacks = {
 const mediaFileReaders: MediaFileReaderClass[] = [];
 const mediaTagReaders: MediaTagReaderClass[] = [];
 
-function read(location: unknown, callbacks: CallbackType): void {
+function read(location: unknown, callbacks: CallbackType<TagType>): void;
+function read(location: unknown): Promise<TagType>;
+function read(
+  location: unknown,
+  callbacks?: CallbackType<TagType>
+): void | Promise<TagType> {
+  if (callbacks === undefined) {
+    return new Reader(location).read();
+  }
   new Reader(location).read(callbacks);
+}
+
+function readAsync(location: unknown): Promise<TagType> {
+  return new Reader(location).read();
 }
 
 function isRangeValid(range: ByteRange, fileSize: number): boolean {
@@ -64,7 +81,15 @@ class Reader {
     return this;
   }
 
-  read(callbacks: CallbackType): void {
+  read(callbacks: CallbackType<TagType>): void;
+  read(): Promise<TagType>;
+  read(callbacks?: CallbackType<TagType>): void | Promise<TagType> {
+    if (callbacks === undefined) {
+      return new Promise<TagType>((resolve, reject) => {
+        this.read({ onSuccess: resolve, onError: reject });
+      });
+    }
+
     const FileReader = this._getFileReader();
     const fileReader = new FileReader(this._file);
     const self = this;
@@ -82,6 +107,10 @@ class Reader {
       },
       onError: callbacks.onError,
     });
+  }
+
+  readAsync(): Promise<TagType> {
+    return this.read();
   }
 
   _getFileReader(): MediaFileReaderClass {
@@ -292,6 +321,7 @@ if (nodeProcess && !nodeProcess.browser) {
 
 export = {
   read: read,
+  readAsync: readAsync,
   Reader: Reader,
   Config: Config,
 };

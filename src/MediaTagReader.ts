@@ -31,7 +31,15 @@ class MediaTagReader {
     return this;
   }
 
-  read(callbacks: CallbackType<TagType>): void {
+  read(callbacks: CallbackType<TagType>): void;
+  read(): Promise<TagType>;
+  read(callbacks?: CallbackType<TagType>): void | Promise<TagType> {
+    if (callbacks === undefined) {
+      return new Promise<TagType>((resolve, reject) => {
+        this.read({ onSuccess: resolve, onError: reject });
+      });
+    }
+
     const self = this;
 
     this._mediaFileReader.init({
@@ -59,6 +67,10 @@ class MediaTagReader {
       },
       onError: callbacks.onError,
     });
+  }
+
+  readAsync(): Promise<TagType> {
+    return this.read();
   }
 
   getShortcuts(): Record<string, string | string[]> {
