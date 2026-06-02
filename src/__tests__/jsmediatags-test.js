@@ -1,6 +1,7 @@
 jest
   .enableAutomock()
   .dontMock("../jsmediatags")
+  .dontMock("../registerNodeFileReaders")
   .dontMock("../ByteArrayUtils");
 
 const jsmediatags = require("../jsmediatags");

@@ -301,23 +301,8 @@ Config.addFileReader(XhrFileReader)
   .addTagReader(MP4TagReader)
   .addTagReader(FLACTagReader);
 
-const nodeProcess =
-  typeof process !== "undefined"
-    ? (process as NodeJS.Process & { browser?: boolean })
-    : undefined;
-
-if (nodeProcess && !nodeProcess.browser) {
-  if (
-    typeof navigator !== "undefined" &&
-    (navigator as { product?: string }).product === "ReactNative"
-  ) {
-    const ReactNativeFileReader = require("./ReactNativeFileReader");
-    Config.addFileReader(ReactNativeFileReader);
-  } else {
-    const NodeFileReader = require("./NodeFileReader");
-    Config.addFileReader(NodeFileReader);
-  }
-}
+const registerNodeFileReaders = require("./registerNodeFileReaders");
+registerNodeFileReaders(Config);
 
 export = {
   read: read,

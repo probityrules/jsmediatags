@@ -18,8 +18,23 @@
       "email": "jesse.ditson@gmail.com"
     }
   ],
-  "main": "build2/jsmediatags.js",
-  "browser": "dist/jsmediatags.js",
+  "main": "build/jsmediatags.js",
+  "types": "build/jsmediatags.d.ts",
+  "browser": "dist/jsmediatags.min.js",
+  "exports": {
+    ".": {
+      "types": "./build/jsmediatags.d.ts",
+      "browser": "./dist/jsmediatags.min.js",
+      "default": "./build/jsmediatags.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "build/**/*.js",
+    "build/**/*.d.ts",
+    "dist/jsmediatags.min.js",
+    "LICENSE.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aadsm/jsmediatags.git"
@@ -49,32 +64,35 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
-    "jest-environment-jsdom": "^29.7.0",
     "@types/node": "^20.14.0",
-    "browserify": "^16.3.0",
-    "google-closure-compiler": "20170626.0.0",
+    "esbuild": "^0.25.0",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "react": "^16.2.0",
     "react-native": "^0.64.0",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.6.3",
-    "watchify": "^4.0.0"
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "test": "jest",
     "build": "tsc",
+    "build:browser": "node scripts/build-browser.mjs",
     "watch": "tsc --watch",
-    "dist-dev": "mkdir -p dist && browserify build2/jsmediatags.js --detect-globals false -i ./build2/NodeFileReader.js -i ./build2/ReactNativeFileReader.js -o dist/jsmediatags.js -s jsmediatags",
-    "dist-watch": "mkdir -p dist && watchify build2/jsmediatags.js -v --detect-globals false -i ./build2/NodeFileReader.js -i ./build2/ReactNativeFileReader.js -o dist/jsmediatags.js -s jsmediatags",
-    "dist": "npm run dist-dev && java -jar node_modules/google-closure-compiler/compiler.jar --warning_level QUIET --compilation_level SIMPLE_OPTIMIZATIONS --js dist/jsmediatags.js > dist/jsmediatags.min.js"
+    "dist": "npm run build:browser",
+    "dist-watch": "node scripts/build-browser.mjs --watch",
+    "prepublishOnly": "npm run build && npm run dist"
   },
   "jest": {
     "preset": "ts-jest",
     "rootDir": "./src",
     "testEnvironment": "node",
-    "moduleFileExtensions": ["ts", "js", "json"]
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ]
   },
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=18.0.0"
   }
 }
