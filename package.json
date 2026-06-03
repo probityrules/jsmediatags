@@ -1,6 +1,6 @@
 {
   "name": "jsmediatags",
-  "version": "3.9.7",
+  "version": "4.0.0",
   "description": "Media Tags Reader (ID3, MP4)",
   "author": {
     "name": "António Afonso",
@@ -58,9 +58,17 @@
   "dependencies": {
     "xhr2": "^0.1.4"
   },
-  "optionalPeerDependencies": {
+  "peerDependencies": {
     "buffer": "^5.0.8",
     "react-native-fs": "^2.9.2"
+  },
+  "peerDependenciesMeta": {
+    "buffer": {
+      "optional": true
+    },
+    "react-native-fs": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

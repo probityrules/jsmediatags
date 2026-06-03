@@ -8,7 +8,7 @@ import type {
   ByteRange,
   TagType,
   TagFrame
-} from './FlowTypes';
+} from './types';
 
 type MediaReader = InstanceType<typeof MediaFileReader>;
 

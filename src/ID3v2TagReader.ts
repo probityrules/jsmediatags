@@ -9,8 +9,8 @@ import type {
   TagHeader,
   ByteRange,
   TagType,
-} from "./FlowTypes";
-import type { LoadCallbackType } from "./FlowTypes";
+} from "./types";
+import type { LoadCallbackType } from "./types";
 
 const ID3_HEADER_SIZE = 10;
 

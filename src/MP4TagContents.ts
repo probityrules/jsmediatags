@@ -7,7 +7,7 @@ const getInteger32 = ByteArrayUtils.getInteger32;
 
 import type {
   ByteArray
-} from './FlowTypes';
+} from './types';
 
 class MP4TagContents {
   _atoms: Array<Atom>;

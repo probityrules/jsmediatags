@@ -1,4 +1,4 @@
-import type { CallbackType } from "../../src/FlowTypes";
+import type { CallbackType } from "../../src/types";
 
 export function throwOnError<T>(
   onSuccess: (value: T) => void

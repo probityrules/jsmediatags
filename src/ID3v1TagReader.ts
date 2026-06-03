@@ -3,7 +3,7 @@
 const MediaTagReader = require("./MediaTagReader");
 const MediaFileReader = require("./MediaFileReader");
 
-import type { LoadCallbackType, ByteRange, TagType } from "./FlowTypes";
+import type { LoadCallbackType, ByteRange, TagType } from "./types";
 
 class ID3v1TagReader extends MediaTagReader {
   static getTagIdentifierByteRange(): ByteRange {

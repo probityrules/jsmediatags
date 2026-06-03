@@ -21,7 +21,7 @@ import type {
   ByteArray,
   TagHeaderFlags,
   TagFrameFlags
-} from './FlowTypes';
+} from './types';
 
 class ID3v2TagContents {
   _size!: number;

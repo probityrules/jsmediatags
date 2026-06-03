@@ -58,7 +58,7 @@ import type {
   LoadCallbackType,
   ByteRange,
   TagType
-} from './FlowTypes';
+} from './types';
 
 /**
  * Class representing a MediaTagReader that parses FLAC tags.

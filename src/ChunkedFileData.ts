@@ -11,7 +11,7 @@
 
 const NOT_FOUND = -1;
 
-import type { ChunkType, DataType } from "./FlowTypes";
+import type { ChunkType, DataType } from "./types";
 
 function dataLength(data: DataType): number {
   return data.length;

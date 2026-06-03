@@ -5,7 +5,7 @@ const MediaFileReader = require("./MediaFileReader");
 
 const CHUNK_SIZE = 1024;
 
-import type { LoadCallbackType } from "./FlowTypes";
+import type { LoadCallbackType } from "./types";
 
 type XhrCallbacks = {
   onSuccess: (xhr: XMLHttpRequest) => void;

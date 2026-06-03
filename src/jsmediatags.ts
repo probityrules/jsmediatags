@@ -15,7 +15,7 @@ import type {
   LoadCallbackType,
   ByteRange,
   TagType,
-} from "./FlowTypes";
+} from "./types";
 
 type MediaFileReaderClass = typeof MediaFileReader;
 

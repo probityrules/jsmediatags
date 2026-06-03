@@ -4,7 +4,7 @@ const getInteger32 = require('./ByteArrayUtils').getInteger32;
 
 import type {
   ByteArray
-} from './FlowTypes';
+} from './types';
 
 class FLACTagContents {
   _blocks: Array<MetadataBlock>;

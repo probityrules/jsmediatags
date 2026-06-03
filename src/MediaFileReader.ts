@@ -3,7 +3,7 @@
 const StringUtils = require("./StringUtils");
 
 import type { DecodedString } from "./DecodedString";
-import type { LoadCallbackType, CharsetType } from "./FlowTypes";
+import type { LoadCallbackType, CharsetType } from "./types";
 
 class MediaFileReader {
   protected _isInitialized: boolean;

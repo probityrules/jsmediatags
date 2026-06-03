@@ -14,7 +14,7 @@ import type {
   TagFrame,
   TagFrameHeader,
   TagFrameFlags
-} from './FlowTypes';
+} from './types';
 
 const FRAME_DESCRIPTIONS: Record<string, string> = {
   // v2.2

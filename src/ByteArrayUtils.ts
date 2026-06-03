@@ -1,6 +1,6 @@
 "use strict";
 
-import type { ByteArray } from "./FlowTypes";
+import type { ByteArray } from "./types";
 
 /**
  * Converts a string to a binary array

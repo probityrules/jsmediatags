@@ -2,7 +2,7 @@
 
 const MediaFileReader = require("./MediaFileReader");
 
-import type { Byte, LoadCallbackType } from "./FlowTypes";
+import type { Byte, LoadCallbackType } from "./types";
 
 class ArrayFileReader extends MediaFileReader {
   private _array: Byte[];

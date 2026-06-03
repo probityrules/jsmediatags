@@ -5,7 +5,7 @@ import * as fs from "fs";
 const ChunkedFileData = require("./ChunkedFileData");
 const MediaFileReader = require("./MediaFileReader");
 
-import type { LoadCallbackType } from "./FlowTypes";
+import type { LoadCallbackType } from "./types";
 
 class NodeFileReader extends MediaFileReader {
   private _path: string;

@@ -6,7 +6,7 @@ const { Buffer } = require("buffer");
 const ChunkedFileData = require("./ChunkedFileData");
 const MediaFileReader = require("./MediaFileReader");
 
-import type { LoadCallbackType } from "./FlowTypes";
+import type { LoadCallbackType } from "./types";
 
 class ReactNativeFileReader extends MediaFileReader {
   private _path: string;

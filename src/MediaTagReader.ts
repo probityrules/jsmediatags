@@ -7,7 +7,7 @@ import type {
   LoadCallbackType,
   ByteRange,
   TagType,
-} from "./FlowTypes";
+} from "./types";
 
 class MediaTagReader {
   private _mediaFileReader: InstanceType<typeof MediaFileReader>;
