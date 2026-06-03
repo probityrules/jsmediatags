@@ -373,9 +373,9 @@ Extend the `MediaFileReader` class to implement a new file reader. Methods to im
 * getByteAt
 
 Current Implementations:
-* [NodeFileReader](https://github.com/aadsm/jsmediatags/blob/master/src/NodeFileReader.js) (NodeJS)
-* [XhrFileReader](https://github.com/aadsm/jsmediatags/blob/master/src/XhrFileReader.js) (Browser and NodeJS)
-* [BlobFileReader](https://github.com/aadsm/jsmediatags/blob/master/src/BlobFileReader.js) (Blob and File)
+* [NodeFileReader](https://github.com/aadsm/jsmediatags/blob/master/src/NodeFileReader.ts) (NodeJS)
+* [XhrFileReader](https://github.com/aadsm/jsmediatags/blob/master/src/XhrFileReader.ts) (Browser and NodeJS)
+* [BlobFileReader](https://github.com/aadsm/jsmediatags/blob/master/src/BlobFileReader.ts) (Blob and File)
 
 
 ### New Tag Readers
@@ -388,13 +388,13 @@ Extend the `MediaTagReader` class to implement a new tag reader. Methods to impl
 * \_parseData
 
 Current Implementations:
-* [ID3v1TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/ID3v1TagReader.js)
-* [ID3v2TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/ID3v2TagReader.js)
-* [MP4TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/MP4TagReader.js)
+* [ID3v1TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/ID3v1TagReader.ts)
+* [ID3v2TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/ID3v2TagReader.ts)
+* [MP4TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/MP4TagReader.ts)
 
 ### Unit Testing
 
-Jest is the framework used. Run `npm test` to execute all the tests. CI runs `npm run build`, `npm run dist`, and `npm test` on every push and pull request.
+Jest is the framework used. Run `npm test` to execute all the tests, or `npm run test:watch` during development. CI runs `npm run build`, `npm run dist`, and `npm test` on every push and pull request.
 
 ## JavaScript-ID3-Reader
 If you want to migrate your project from [JavaScript-ID3-Reader](https://github.com/aadsm/JavaScript-ID3-Reader) to `jsmediatags` use the following guiding examples:

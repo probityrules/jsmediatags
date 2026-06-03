@@ -219,8 +219,18 @@ class ID3v2TagContents {
     var size = 0;
     var frameFlags = [0, 0];
     if (flags) {
-      flags.message = flags.message || {};
-      flags.format = flags.format || {};
+      flags.message = flags.message ?? {
+        tag_alter_preservation: false,
+        file_alter_preservation: false,
+        read_only: false,
+      };
+      flags.format = flags.format ?? {
+        grouping_identity: false,
+        compression: false,
+        encryption: false,
+        unsynchronisation: false,
+        data_length_indicator: false,
+      };
     }
     data = data || [];
 

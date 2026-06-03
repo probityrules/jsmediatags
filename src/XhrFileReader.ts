@@ -130,10 +130,10 @@ class XhrFileReader extends MediaFileReader {
     const contentLength = this._getResponseHeader(xhr, "Content-Length");
 
     if (contentLength == null) {
-      return contentLength;
-    } else {
-      return parseInt(contentLength, 10);
+      return null;
     }
+
+    return parseInt(contentLength, 10);
   }
 
   _parseContentRange(xhr: XMLHttpRequest): ContentRangeType | null {
