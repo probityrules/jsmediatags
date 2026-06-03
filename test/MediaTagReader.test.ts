@@ -1,10 +1,13 @@
+
+import { useFakeAsyncTimers } from "./helpers/useFakeAsyncTimers";
 jest
-  .dontMock('../MediaTagReader');
+  .dontMock('../src/MediaTagReader');
 
-const MediaTagReader = require('../MediaTagReader');
-const MediaFileReader = require('../MediaFileReader');
+const MediaTagReader = require('../src/MediaTagReader');
+const MediaFileReader = require('../src/MediaFileReader');
 
-describe("MediaTagReader", function() {
+describe("MediaTagReader", function () {
+  useFakeAsyncTimers();
   var mediaTagReader;
   var mediaFileReader;
 

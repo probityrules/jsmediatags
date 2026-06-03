@@ -1,19 +1,14 @@
+import { useFakeAsyncTimers } from "./helpers/useFakeAsyncTimers";
+import { throwOnError } from "./helpers/callbackHelpers";
+
 jest
-  .dontMock('../ArrayFileReader')
-  .dontMock('../MediaFileReader');
+  .dontMock('../src/ArrayFileReader')
+  .dontMock('../src/MediaFileReader');
 
-var ArrayFileReader = require('../ArrayFileReader');
+var ArrayFileReader = require('../src/ArrayFileReader');
 
-function throwOnError(onSuccess) {
-  return {
-    onSuccess: onSuccess,
-    onError: function() {
-      throw new Error();
-    }
-  }
-}
-
-describe("ArrayFileReader", function() {
+describe("ArrayFileReader", function () {
+  useFakeAsyncTimers();
   var fileReader;
 
   beforeEach(function() {

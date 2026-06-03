@@ -1,8 +1,9 @@
+
 jest
-  .mock('fs')
-  .dontMock('../NodeFileReader')
-  .dontMock('../MediaFileReader')
-  .dontMock('../ChunkedFileData');
+  .mock('fs', () => require('./mocks/fs.js'))
+  .dontMock('../src/NodeFileReader')
+  .dontMock('../src/MediaFileReader')
+  .dontMock('../src/ChunkedFileData');
 
 describe("NodeFileReader", function() {
   var NodeFileReader;
@@ -12,7 +13,7 @@ describe("NodeFileReader", function() {
     require('fs').__setMockFiles({
       "fakefile": "This is a simple file"
     });
-    NodeFileReader = require('../NodeFileReader');
+    NodeFileReader = require('../src/NodeFileReader');
   });
 
   it("should be able to read the right type of files", function() {

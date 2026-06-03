@@ -1,7 +1,8 @@
-jest
-  .dontMock('../ChunkedFileData');
 
-var ChunkedFileData = require('../ChunkedFileData');
+jest
+  .dontMock('../src/ChunkedFileData');
+
+var ChunkedFileData = require('../src/ChunkedFileData');
 
 describe("ChunkedFileData", function() {
   var chunkedFileData;
@@ -193,72 +194,72 @@ describe("ChunkedFileData", function() {
       chunkedFileData = new ChunkedFileData();
 
       var range = chunkedFileData._getChunkRange(100, 200);
-      expect(range.startIx).toBe(ChunkedFileData.NOT_FOUND, "startIx");
-      expect(range.endIx).toBe(ChunkedFileData.NOT_FOUND, "endIx");
-      expect(range.insertIx).toBe(0, "insertIx");
+      expect(range.startIx).toBe(ChunkedFileData.NOT_FOUND);
+      expect(range.endIx).toBe(ChunkedFileData.NOT_FOUND);
+      expect(range.insertIx).toBe(0);
     })
 
     it("should find no range when offset is before any chunk", function() {
       var range = chunkedFileData._getChunkRange(50, 70);
-      expect(range.startIx).toBe(ChunkedFileData.NOT_FOUND, "startIx");
-      expect(range.endIx).toBe(ChunkedFileData.NOT_FOUND, "endIx");
-      expect(range.insertIx).toBe(0, "insertIx");
+      expect(range.startIx).toBe(ChunkedFileData.NOT_FOUND);
+      expect(range.endIx).toBe(ChunkedFileData.NOT_FOUND);
+      expect(range.insertIx).toBe(0);
     });
 
     it("should find no range when offset is after all chunks", function() {
       var range = chunkedFileData._getChunkRange(500, 600);
-      expect(range.startIx).toBe(ChunkedFileData.NOT_FOUND, "startIx");
-      expect(range.endIx).toBe(ChunkedFileData.NOT_FOUND, "endIx");
-      expect(range.insertIx).toBe(3, "insertIx");
+      expect(range.startIx).toBe(ChunkedFileData.NOT_FOUND);
+      expect(range.endIx).toBe(ChunkedFileData.NOT_FOUND);
+      expect(range.insertIx).toBe(3);
     });
 
     it("should find no range when offset is between chunks", function() {
       var range = chunkedFileData._getChunkRange(170, 190);
-      expect(range.startIx).toBe(ChunkedFileData.NOT_FOUND, "startIx");
-      expect(range.endIx).toBe(ChunkedFileData.NOT_FOUND, "endIx");
-      expect(range.insertIx).toBe(1, "insertIx");
+      expect(range.startIx).toBe(ChunkedFileData.NOT_FOUND);
+      expect(range.endIx).toBe(ChunkedFileData.NOT_FOUND);
+      expect(range.insertIx).toBe(1);
     });
 
     it("should find a range when offset completly overlaps a chunk", function() {
       var range = chunkedFileData._getChunkRange(170, 270);
-      expect(range.startIx).toBe(1, "startIx");
-      expect(range.endIx).toBe(1, "endIx");
+      expect(range.startIx).toBe(1);
+      expect(range.endIx).toBe(1);
     });
 
     it("should find a range when offset completly overlaps several chunks", function() {
       var range = chunkedFileData._getChunkRange(50, 500);
-      expect(range.startIx).toBe(0, "startIx");
-      expect(range.endIx).toBe(2, "endIx");
+      expect(range.startIx).toBe(0);
+      expect(range.endIx).toBe(2);
     });
 
     it("should find a range when offset is completly overlapped by a chunk", function() {
       var range = chunkedFileData._getChunkRange(210, 240);
-      expect(range.startIx).toBe(1, "startIx");
-      expect(range.endIx).toBe(1, "endIx");
+      expect(range.startIx).toBe(1);
+      expect(range.endIx).toBe(1);
     });
 
     it("should find a range when offset head partially overlapps a chunk", function() {
       var range = chunkedFileData._getChunkRange(210, 270);
-      expect(range.startIx).toBe(1, "startIx");
-      expect(range.endIx).toBe(1, "endIx");
+      expect(range.startIx).toBe(1);
+      expect(range.endIx).toBe(1);
     });
 
     it("should find a range when offset tail partially overlapps a chunk", function() {
       var range = chunkedFileData._getChunkRange(170, 210);
-      expect(range.startIx).toBe(1, "startIx");
-      expect(range.endIx).toBe(1, "endIx");
+      expect(range.startIx).toBe(1);
+      expect(range.endIx).toBe(1);
     });
 
     it("should find a range when offset is left adjacent to a chunk", function() {
       var range = chunkedFileData._getChunkRange(170, 199);
-      expect(range.startIx).toBe(1, "startIx");
-      expect(range.endIx).toBe(1, "endIx");
+      expect(range.startIx).toBe(1);
+      expect(range.endIx).toBe(1);
     });
 
     it("should find a range when offset is right adjacent to a chunk", function() {
       var range = chunkedFileData._getChunkRange(250, 270);
-      expect(range.startIx).toBe(1, "startIx");
-      expect(range.endIx).toBe(1, "endIx");
+      expect(range.startIx).toBe(1);
+      expect(range.endIx).toBe(1);
     });
   });
 

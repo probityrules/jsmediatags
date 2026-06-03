@@ -1,32 +1,18 @@
 /** @jest-environment jsdom */
 
+import { useFakeAsyncTimers } from "./helpers/useFakeAsyncTimers";
+import { throwOnError, throwOnSuccess } from "./helpers/callbackHelpers";
+
 jest
-  .mock('xhr2')
-  .dontMock('../XhrFileReader')
-  .dontMock('../MediaFileReader')
-  .dontMock('../ChunkedFileData');
+  .mock('xhr2', () => require('./mocks/xhr2.js'))
+  .dontMock('../src/XhrFileReader')
+  .dontMock('../src/MediaFileReader')
+  .dontMock('../src/ChunkedFileData');
 
-var XhrFileReader = require('../XhrFileReader');
+var XhrFileReader = require('../src/XhrFileReader');
 
-function throwOnError(onSuccess) {
-  return {
-    onSuccess: onSuccess,
-    onError: function() {
-      throw new Error();
-    }
-  }
-}
-
-function throwOnSuccess(onError) {
-  return {
-    onSuccess: function() {
-      throw new Error();
-    },
-    onError: onError
-  }
-}
-
-describe("XhrFileReader", function() {
+describe("XhrFileReader", function () {
+  useFakeAsyncTimers();
   var fileReader;
 
   beforeEach(function() {

@@ -1,22 +1,17 @@
 /** @jest-environment jsdom */
 
+import { useFakeAsyncTimers } from "./helpers/useFakeAsyncTimers";
+import { throwOnError } from "./helpers/callbackHelpers";
+
 jest
-  .dontMock('../BlobFileReader')
-  .dontMock('../MediaFileReader')
-  .dontMock('../ChunkedFileData');
+  .dontMock('../src/BlobFileReader')
+  .dontMock('../src/MediaFileReader')
+  .dontMock('../src/ChunkedFileData');
 
-var BlobFileReader = require('../BlobFileReader');
+var BlobFileReader = require('../src/BlobFileReader');
 
-function throwOnError(onSuccess) {
-  return {
-    onSuccess: onSuccess,
-    onError: function() {
-      throw new Error();
-    }
-  }
-}
-
-describe("BlobFileReader", function() {
+describe("BlobFileReader", function () {
+  useFakeAsyncTimers();
   var fileReader;
 
   beforeEach(function() {

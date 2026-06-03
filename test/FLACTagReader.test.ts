@@ -1,10 +1,13 @@
+
+import { useFakeAsyncTimers } from "./helpers/useFakeAsyncTimers";
 jest.autoMockOff();
 
-const ArrayFileReader = require('../ArrayFileReader');
-const FLACTagContents = require('../FLACTagContents');
-const FLACTagReader = require('../FLACTagReader');
+const ArrayFileReader = require('../src/ArrayFileReader');
+const FLACTagContents = require('../src/FLACTagContents');
+const FLACTagReader = require('../src/FLACTagReader');
 
-describe("FLACTagReader", function() {
+describe("FLACTagReader", function () {
+  useFakeAsyncTimers();
   var flacFileContents = new FLACTagContents([FLACTagContents.createCommentBlock(
     ["TITLE", "A Title"],
     ["ARTIST", "An Artist"],

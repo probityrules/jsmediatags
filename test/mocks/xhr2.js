@@ -1,20 +1,21 @@
-var xhr2Mock = jest.genMockFromModule('xhr2');
+const xhr2Mock = jest.genMockFromModule("xhr2");
 
-var _mockUrls = {};
+let _mockUrls = {};
+
 function __setMockUrls(newMockUrls) {
   _mockUrls = {};
 
-  for (var url in newMockUrls) {
+  for (const url in newMockUrls) {
     _mockUrls[url] = newMockUrls[url];
   }
-};
+}
 
 function isRangeDisabled(url) {
   return !!(_mockUrls[url] || {}).disableRange;
 }
 
 function getUrlContents(url, range) {
-  var urlData = _mockUrls[url];
+  const urlData = _mockUrls[url];
 
   if (urlData == null) {
     return null;
@@ -24,8 +25,8 @@ function getUrlContents(url, range) {
     range = null;
   }
 
-  var contents;
-  if (typeof urlData === 'string') {
+  let contents;
+  if (typeof urlData === "string") {
     contents = urlData;
   } else {
     contents = urlData.contents;
@@ -35,7 +36,7 @@ function getUrlContents(url, range) {
 }
 
 function getUrlFileLength(url) {
-  var urlData = _mockUrls[url];
+  const urlData = _mockUrls[url];
 
   if (urlData == null || urlData.unknownLength) {
     return null;
@@ -45,15 +46,15 @@ function getUrlFileLength(url) {
 }
 
 function isHeaderDisallowed(url, header) {
-  var urlData = _mockUrls[url];
+  const urlData = _mockUrls[url];
   return (
     urlData != null &&
-    (urlData.disallowedHeaders||[]).indexOf(header) >= 0
+    (urlData.disallowedHeaders || []).indexOf(header) >= 0
   );
 }
 
 function getUrlContentLength(url, range) {
-  if (isHeaderDisallowed(url, 'content-length')) {
+  if (isHeaderDisallowed(url, "content-length")) {
     return null;
   }
 
@@ -61,7 +62,7 @@ function getUrlContentLength(url, range) {
 }
 
 function getUrlStatusCode(url) {
-  var urlData = _mockUrls[url];
+  const urlData = _mockUrls[url];
 
   if (urlData == null) {
     return 404;
@@ -71,30 +72,30 @@ function getUrlStatusCode(url) {
 }
 
 function getTimeout(url) {
-  var urlData = _mockUrls[url];
+  const urlData = _mockUrls[url];
   return urlData ? urlData.timeout : 0;
 }
 
 function XMLHttpRequestMock() {
-  var _url;
-  var _range;
+  let _url;
+  let _range;
 
-  this.onload = function() {};
-  this.open = jest.fn().mockImplementation(function(method, url) {
+  this.onload = function () {};
+  this.open = jest.fn().mockImplementation(function (method, url) {
     _url = url;
     _range = null;
   });
   this.overrideMimeType = jest.fn();
   this.setRequestHeader = jest.fn().mockImplementation(
-    function(headerName, headerValue) {
+    function (headerName, headerValue) {
       if (headerName.toLowerCase() === "range") {
-        var matches = headerValue.match(/bytes=(\d+)-(\d+)/);
+        const matches = headerValue.match(/bytes=(\d+)-(\d+)/);
         _range = [Number(matches[1]), Number(matches[2])];
       }
     }
   );
   this.getResponseHeader = jest.fn().mockImplementation(
-    function(headerName) {
+    function (headerName) {
       if (headerName.toLowerCase() === "content-length") {
         return getUrlContentLength(_url, _range);
       } else if (headerName.toLowerCase() === "content-range") {
@@ -102,15 +103,15 @@ function XMLHttpRequestMock() {
       }
     }
   );
-  this._getContentRange = function() {
-    if (_range && !isRangeDisabled(_url) && !isHeaderDisallowed('content-range')) {
-      var endByte = Math.min(_range[1], getUrlContents(_url).length - 1);
+  this._getContentRange = function () {
+    if (_range && !isRangeDisabled(_url) && !isHeaderDisallowed("content-range")) {
+      const endByte = Math.min(_range[1], getUrlContents(_url).length - 1);
       return "bytes " + _range[0] + "-" + endByte + "/" + (getUrlFileLength(_url) || "*");
     }
-  }
+  };
   this.getAllResponseHeaders = jest.fn().mockImplementation(
-    function() {
-      var headers = [];
+    function () {
+      const headers = [];
 
       headers.push("content-length: " + getUrlContentLength(_url, _range));
       if (this._getContentRange()) {
@@ -120,11 +121,11 @@ function XMLHttpRequestMock() {
       return headers.join("\r\n");
     }
   );
-  this.send = jest.fn().mockImplementation(function() {
-    var requestTimeout = getTimeout(_url);
+  this.send = jest.fn().mockImplementation(function () {
+    const requestTimeout = getTimeout(_url);
 
     setTimeout(
-      function() {
+      function () {
         this.status = getUrlStatusCode(_url);
         this.responseText = getUrlContents(_url, _range);
         this.onload();
@@ -134,7 +135,7 @@ function XMLHttpRequestMock() {
 
     if (requestTimeout && this.timeout && requestTimeout > this.timeout && this.ontimeout) {
       setTimeout(
-        function() {
+        function () {
           this.ontimeout({});
         }.bind(this),
         this.timeout
@@ -143,9 +144,11 @@ function XMLHttpRequestMock() {
   });
 }
 
-var XMLHttpRequest = new XMLHttpRequestMock();
+const XMLHttpRequest = new XMLHttpRequestMock();
 xhr2Mock.__setMockUrls = __setMockUrls;
 xhr2Mock.XMLHttpRequest = XMLHttpRequest;
-window.XMLHttpRequest = function() { return XMLHttpRequest; };
+window.XMLHttpRequest = function () {
+  return XMLHttpRequest;
+};
 
 module.exports = xhr2Mock;

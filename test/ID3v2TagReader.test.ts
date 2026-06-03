@@ -1,12 +1,15 @@
+
+import { useFakeAsyncTimers } from "./helpers/useFakeAsyncTimers";
 jest.autoMockOff();
 
-const ID3v2TagReader = require('../ID3v2TagReader');
-const ID3v2TagContents = require('../ID3v2TagContents');
-const ArrayFileReader = require('../ArrayFileReader');
+const ID3v2TagReader = require('../src/ID3v2TagReader');
+const ID3v2TagContents = require('../src/ID3v2TagContents');
+const ArrayFileReader = require('../src/ArrayFileReader');
 
-const bin = require('../ByteArrayUtils').bin;
+const bin = require('../src/ByteArrayUtils').bin;
 
-describe("ID3v2TagReader", function() {
+describe("ID3v2TagReader", function () {
+  useFakeAsyncTimers();
   var tagReader;
   var mediaFileReader;
   var id3FileContents =

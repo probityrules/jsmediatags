@@ -1,18 +1,12 @@
+import { useFakeAsyncTimers } from "./helpers/useFakeAsyncTimers";
+import { throwOnError } from "./helpers/callbackHelpers";
+
 jest
-    .dontMock('../ArrayBufferFileReader')
-    .dontMock('../MediaFileReader')
-    .dontMock('../ChunkedFileData');
+    .dontMock('../src/ArrayBufferFileReader')
+    .dontMock('../src/MediaFileReader')
+    .dontMock('../src/ChunkedFileData');
 
-var ArrayBufferFileReader = require('../ArrayBufferFileReader');
-
-function throwOnError(onSuccess) {
-    return {
-        onSuccess: onSuccess,
-        onError: function() {
-            throw new Error();
-        }
-    }
-}
+var ArrayBufferFileReader = require('../src/ArrayBufferFileReader');
 
 function str2ab(str) {
     var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
@@ -23,7 +17,8 @@ function str2ab(str) {
     return buf;
 }
 
-describe("ArrayBufferFileReader", function() {
+describe("ArrayBufferFileReader", function () {
+  useFakeAsyncTimers();
     var fileReader;
     const arrBuffer = str2ab('TEST');
 

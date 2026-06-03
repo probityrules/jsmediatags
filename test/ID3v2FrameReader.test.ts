@@ -1,8 +1,9 @@
+
 jest.autoMockOff();
 
-const ID3v2FrameReader = require('../ID3v2FrameReader');
-const ArrayFileReader = require('../ArrayFileReader');
-const bin = require('../ByteArrayUtils').bin;
+const ID3v2FrameReader = require('../src/ID3v2FrameReader');
+const ArrayFileReader = require('../src/ArrayFileReader');
+const bin = require('../src/ByteArrayUtils').bin;
 
 describe("ID3v2FrameReader", function() {
   it("should read APIC tag", function() {

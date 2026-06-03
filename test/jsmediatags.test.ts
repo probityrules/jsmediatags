@@ -1,28 +1,23 @@
+import { useFakeAsyncTimers } from "./helpers/useFakeAsyncTimers";
+import { throwOnSuccess } from "./helpers/callbackHelpers";
+
 jest
   .enableAutomock()
-  .dontMock("../jsmediatags")
-  .dontMock("../registerNodeFileReaders")
-  .dontMock("../ByteArrayUtils");
+  .dontMock("../src/jsmediatags")
+  .dontMock("../src/registerNodeFileReaders")
+  .dontMock("../src/ByteArrayUtils");
 
-const jsmediatags = require("../jsmediatags");
-const NodeFileReader = require("../NodeFileReader");
-const XhrFileReader = require("../XhrFileReader");
-const ArrayFileReader = require("../ArrayFileReader");
-const ID3v1TagReader = require("../ID3v1TagReader");
-const ID3v2TagReader = require("../ID3v2TagReader");
-const MP4TagReader = require("../MP4TagReader");
-const FLACTagReader = require("../FLACTagReader");
+const jsmediatags = require("../src/jsmediatags");
+const NodeFileReader = require("../src/NodeFileReader");
+const XhrFileReader = require("../src/XhrFileReader");
+const ArrayFileReader = require("../src/ArrayFileReader");
+const ID3v1TagReader = require("../src/ID3v1TagReader");
+const ID3v2TagReader = require("../src/ID3v2TagReader");
+const MP4TagReader = require("../src/MP4TagReader");
+const FLACTagReader = require("../src/FLACTagReader");
 
-function throwOnSuccess(onError) {
-  return {
-    onSuccess: function() {
-      throw new Error();
-    },
-    onError: onError
-  }
-}
-
-describe("jsmediatags", function() {
+describe("jsmediatags", function () {
+  useFakeAsyncTimers();
   var mockFileReader;
   var mockTags = {};
 
