@@ -7,6 +7,10 @@ Donations are towards the ["Girls Who Code" NPO](https://www.classy.org/checkout
 
 ## Features
 
+* **[Derek Detweiler](https://github.com/probityrules)** - 4.0.0 (this fork)
+  * Migrated the codebase from Flow to TypeScript with published type declarations.
+  * Added Promise-based `read()` / `readAsync()` APIs while keeping callback support.
+
 * **[David Roeca](https://github.com/davidroeca)**
   * Added React Native support.
 

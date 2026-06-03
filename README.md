@@ -1,11 +1,16 @@
 # JS MediaTags
 
-The next version of https://github.com/aadsm/JavaScript-ID3-Reader.
+Read ID3, MP4, and FLAC metadata from audio files in Node.js, browsers, and React Native. Successor to [JavaScript-ID3-Reader](https://github.com/aadsm/JavaScript-ID3-Reader).
+
+This repository is a **fork and modernization** of [aadsm/jsmediatags](https://github.com/aadsm/jsmediatags), the original library and its maintenance home. Development here targets **4.0.0** (TypeScript, updated tooling, and packaging). It is not guaranteed to be merged upstream; treat [aadsm/jsmediatags](https://github.com/aadsm/jsmediatags) as the canonical project history and this fork as an upgraded continuation.
+
+**Requirements:** Node.js **18+** (for the npm package). See [CHANGELOG.md](CHANGELOG.md) for **4.0.0** breaking changes if upgrading from 3.x.
 
 ## Donations
+
 A few people have asked me about donations (or even crowdfunding). I would prefer you to consider making a donation to the ["Girls Who Code" NPO](https://www.classy.org/checkout/donation?eid=77372). If you do please send me a message so I can add you as a contributor.
 
-## [Contributors](https://github.com/aadsm/jsmediatags/blob/master/CONTRIBUTORS.md)
+## [Contributors](CONTRIBUTORS.md)
 
 ## [Contributing](https://github.com/aadsm/jsmediatags/blob/master/CONTRIBUTING.md)
 
@@ -26,9 +31,13 @@ A few people have asked me about donations (or even crowdfunding). I would prefe
 
 ## How to use
 
-### NodeJS
+### Node.js
 
-Run `npm install jsmediatags --save` to install.
+```bash
+npm install jsmediatags
+```
+
+The published package includes compiled JavaScript and TypeScript declarations (`build/jsmediatags.d.ts`). You do not need to compile the library yourself when installing from npm.
 
 #### Callback API
 
@@ -126,11 +135,11 @@ const tag = await jsmediatags.read("https://www.example.com/music-file.mp3");
 
 Note that the URI has to include the scheme (e.g.: https://), as relative URIs are not supported.
 
-
 ```javascript
 // From Blob
 jsmediatags.read(blob, ...);
 ```
+
 ```javascript
 // From File
 inputTypeFile.addEventListener("change", function(event) {
@@ -141,14 +150,16 @@ inputTypeFile.addEventListener("change", function(event) {
 
 ### React Native
 
-React Native support requires some additional dependencies:
+Install the library, then the optional peer dependencies used by the React Native file reader:
 
 ```bash
-npm install --save jsmediatags buffer react-native-fs
+npm install jsmediatags
+npm install buffer react-native-fs
 ```
 
-With these dependencies installed, usage with React Native should remain the
-same:
+(`buffer` and `react-native-fs` are declared as optional `peerDependencies` in `package.json`.)
+
+Usage is the same as in Node.js:
 
 ```js
 const jsmediatags = require('jsmediatags');
@@ -177,9 +188,11 @@ const tag2 = await new jsmediatags.Reader('/path/to/song.mp3').read();
 ## Documentation
 
 ### The Output
+
 This is an example of the object passed to the `jsmediatags.read`'s `onSuccess` callback.
 
 #### ID3v2
+
 ```javascript
 {
   type: "ID3",
@@ -220,6 +233,7 @@ This is an example of the object passed to the `jsmediatags.read`'s `onSuccess` 
 ```
 
 #### MP4
+
 ```javascript
 {
   type: "MP4",
@@ -237,6 +251,7 @@ This is an example of the object passed to the `jsmediatags.read`'s `onSuccess` 
 ```
 
 #### FLAC
+
 ```javascript
 {
   type: "FLAC",
@@ -256,7 +271,7 @@ Since each tag type (e.g.: ID3, MP4) uses different tag names for the same type 
 
 The expected tag object depends on the type of tag read (ID3, MP4, etc.) but they all share a common structure:
 
-```
+```javascript
 {
   type: <the tag type: ID3, MP4, etc.>
   tags: {
@@ -288,12 +303,12 @@ These are the supported shortcuts.
 The `picture` tag contains an array buffer of all the bytes of the album artwork image as well as the content type of the image. The data can be converted and displayed as an image using:
 
 ```javascript
-const { data, format } = result.tags.picture;
+const picture = result.tags.picture;
 let base64String = "";
-for (const i = 0; i < data.length; i++) {
-  base64String += String.fromCharCode(data[i]);
+for (let i = 0; i < picture.data.length; i++) {
+  base64String += String.fromCharCode(picture.data[i]);
 }
-img.src = `data:${data.format};base64,${window.btoa(base64String)}`;
+img.src = `data:${picture.format};base64,${window.btoa(base64String)}`;
 ```
 
 ### HTTP Access Control (CORS)
@@ -304,7 +319,8 @@ This can be configured by returning the `Access-Control-Allow-Headers` HTTP head
 Similarly, you should also allow for the browser to read the `Content-Length` and `Content-Range` headers. This can be configured by returning the  `Access-Control-Expose-Headers` HTTP header.
 
 In short, the following headers are expected:
-```
+
+```http
 Access-Control-Allow-Headers: If-Modified-Since, Range
 Access-Control-Expose-Headers: Content-Length, Content-Range
 ```
@@ -321,7 +337,20 @@ A similar approach is taken for the tag reader. The most appropriate tag reader 
 
 However, you can specify exactly which file reader or tag reader to use using the advanced API.
 
-New file and tag readers can be implemented by extending the MediaFileReader and MediaTagReader classes. Check the `Development` section down bellow for more information.
+New file and tag readers can be implemented by extending the MediaFileReader and MediaTagReader classes. Check the **Development** section below for more information.
+
+### TypeScript
+
+Types are published with the package. Import the default export and optionally use tag types from the compiled declarations:
+
+```typescript
+import jsmediatags from "jsmediatags";
+import type { TagType } from "jsmediatags/build/types";
+
+const tag: TagType = await jsmediatags.readAsync("./music-file.mp3");
+```
+
+When developing this repo locally, shared source types live in [`src/types.ts`](src/types.ts).
 
 ### Reference
 
@@ -345,7 +374,7 @@ New file and tag readers can be implemented by extending the MediaFileReader and
 
 Source code is written in TypeScript. Run `npm run build` to compile the Node/CommonJS output into the `build` directory.
 
-### NodeJS
+### NodeJS Development
 
 Run `npm run build` to generate proper JavaScript code into the `build` directory.
 
@@ -357,7 +386,7 @@ var ID3v2TagReader = require('./build/ID3v2TagReader');
 
 Run `npm run watch` to automatically recompile the source code whenever a file is changed.
 
-### Browser
+### Browser Development
 
 Run `npm run dist` to generate browser bundles with esbuild: `dist/jsmediatags.js` (debug) and `dist/jsmediatags.min.js` (production). Both expose a global `jsmediatags` object when loaded via a script tag.
 
@@ -373,10 +402,10 @@ Extend the `MediaFileReader` class to implement a new file reader. Methods to im
 * getByteAt
 
 Current Implementations:
+
 * [NodeFileReader](https://github.com/aadsm/jsmediatags/blob/master/src/NodeFileReader.ts) (NodeJS)
 * [XhrFileReader](https://github.com/aadsm/jsmediatags/blob/master/src/XhrFileReader.ts) (Browser and NodeJS)
 * [BlobFileReader](https://github.com/aadsm/jsmediatags/blob/master/src/BlobFileReader.ts) (Blob and File)
-
 
 ### New Tag Readers
 
@@ -388,26 +417,48 @@ Extend the `MediaTagReader` class to implement a new tag reader. Methods to impl
 * \_parseData
 
 Current Implementations:
+
 * [ID3v1TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/ID3v1TagReader.ts)
 * [ID3v2TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/ID3v2TagReader.ts)
 * [MP4TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/MP4TagReader.ts)
+* [FLACTagReader](https://github.com/aadsm/jsmediatags/blob/master/src/FLACTagReader.ts)
 
 ### Unit Testing
 
-Jest is the framework used. Run `npm test` to execute all the tests, or `npm run test:watch` during development. CI runs `npm run build`, `npm run dist`, and `npm test` on every push and pull request.
+Tests live in the [`test/`](test/) directory. Run `npm test` to execute the suite, or `npm run test:watch` during development. CI runs `npm run build`, `npm run dist`, and `npm test` on every push and pull request.
+
+## Upgrading from 3.x to 4.0
+
+4.0 is a modernization release. The tag-reading API is backward compatible if you keep using callbacks, but packaging and runtime expectations changed:
+
+| Topic | 3.x | 4.0 |
+| --- | --- | --- |
+| Node.js | Older versions often worked | **Node 18+** required |
+| npm `main` | Previous layout | `build/jsmediatags.js` (prebuilt on publish) |
+| Browser bundle | Browserify / UMD-style | **esbuild IIFE** (`dist/jsmediatags.min.js`) |
+| Source | Flow / JavaScript | **TypeScript** |
+| Promise API | Not built in | `read()` / `readAsync()` without callbacks |
+| React Native extras | `optionalPeerDependencies` | Standard **optional** `peerDependencies` |
+
+See [CHANGELOG.md](CHANGELOG.md) for the full list.
 
 ## JavaScript-ID3-Reader
+
 If you want to migrate your project from [JavaScript-ID3-Reader](https://github.com/aadsm/JavaScript-ID3-Reader) to `jsmediatags` use the following guiding examples:
 
 ### All tags
+
 **JavaScript-ID3-Reader:**
+
 ```javascript
 ID3.loadTags("filename.mp3", function() {
   var tags = ID3.getAllTags("filename.mp3");
   alert(tags.artist + " - " + tags.title + ", " + tags.album);
 });
 ```
+
 **jsmediatags:**
+
 ```javascript
 jsmediatags.read("filename.mp3", {
   onSuccess: function(tag) {
@@ -418,7 +469,9 @@ jsmediatags.read("filename.mp3", {
 ```
 
 ### Specific tags
+
 **JavaScript-ID3-Reader:**
+
 ```javascript
 ID3.loadTags("filename.mp3", function() {
   var tags = ID3.getAllTags("filename.mp3");
@@ -426,7 +479,9 @@ ID3.loadTags("filename.mp3", function() {
 },
 {tags: ["COMM", "TCON", "WXXX"]});
 ```
+
 **jsmediatags:**
+
 ```javascript
 new jsmediatags.Reader("filename.mp3")
   .setTagsToRead(["COMM", "TCON", "WXXX"])
@@ -437,8 +492,11 @@ new jsmediatags.Reader("filename.mp3")
     }
   });
 ```
+
 ### Error handling
+
 **JavaScript-ID3-Reader:**
+
 ```javascript
 ID3.loadTags("http://localhost/filename.mp3", function() {
   var tags = ID3.getAllTags("http://localhost/filename.mp3");
@@ -453,7 +511,9 @@ ID3.loadTags("http://localhost/filename.mp3", function() {
   }
 });
 ```
+
 **jsmediatags:**
+
 ```javascript
 new jsmediatags.Reader("filename.mp3")
   .setTagsToRead(["comment", "track", "lyrics"])
@@ -473,6 +533,5 @@ new jsmediatags.Reader("filename.mp3")
 ## Goals
 
 * Improve the API of JavaScript-ID3-Reader
-* Improve the source code with readable code and TypeScript types
-* Have unit tests
-* Support NodeJS
+* Readable TypeScript source with published types and tests
+* Support Node.js, browsers, and React Native
