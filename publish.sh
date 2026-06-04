@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 npm install
-npm publish
+npm publish --access public

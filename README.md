@@ -4,7 +4,9 @@ Read ID3, MP4, and FLAC metadata from audio files in Node.js, browsers, and Reac
 
 This repository is a **fork and modernization** of [aadsm/jsmediatags](https://github.com/aadsm/jsmediatags), the original library and its maintenance home. Development here targets **4.0.0** (TypeScript, updated tooling, and packaging). It is not guaranteed to be merged upstream; treat [aadsm/jsmediatags](https://github.com/aadsm/jsmediatags) as the canonical project history and this fork as an upgraded continuation.
 
-**Requirements:** Node.js **18+** (for the npm package). See [CHANGELOG.md](CHANGELOG.md) for **4.0.0** breaking changes if upgrading from 3.x.
+**npm:** [`@probityrules/jsmediatags`](https://www.npmjs.com/package/@probityrules/jsmediatags) (published from this fork; includes compiled `build/` and browser bundle only, not `src/`).
+
+**Requirements:** Node.js **18+**. See [CHANGELOG.md](CHANGELOG.md) for **4.0.0** breaking changes if upgrading from 3.x.
 
 ## Donations
 
@@ -12,7 +14,7 @@ A few people have asked me about donations (or even crowdfunding). I would prefe
 
 ## [Contributors](CONTRIBUTORS.md)
 
-## [Contributing](https://github.com/aadsm/jsmediatags/blob/master/CONTRIBUTING.md)
+## [Contributing](CONTRIBUTING.md)
 
 ## Current Support
 
@@ -34,16 +36,16 @@ A few people have asked me about donations (or even crowdfunding). I would prefe
 ### Node.js
 
 ```bash
-npm install jsmediatags
+npm install @probityrules/jsmediatags
 ```
 
-The published package includes compiled JavaScript and TypeScript declarations (`build/jsmediatags.d.ts`). You do not need to compile the library yourself when installing from npm.
+The published package includes compiled JavaScript and TypeScript declarations (`build/jsmediatags.d.ts`). Source (`src/`) is not shipped on npm.
 
 #### Callback API
 
 ```javascript
 // Simple API - will fetch all tags
-var jsmediatags = require("jsmediatags");
+var jsmediatags = require("@probityrules/jsmediatags");
 
 jsmediatags.read("./music-file.mp3", {
   onSuccess: function(tag) {
@@ -57,7 +59,7 @@ jsmediatags.read("./music-file.mp3", {
 
 ```javascript
 // Advanced API
-var jsmediatags = require("jsmediatags");
+var jsmediatags = require("@probityrules/jsmediatags");
 
 new jsmediatags.Reader("http://www.example.com/music-file.mp3")
   .setTagsToRead(["title", "artist"])
@@ -76,7 +78,7 @@ new jsmediatags.Reader("http://www.example.com/music-file.mp3")
 Omit callbacks to get a `Promise`, or call `readAsync` explicitly. Rejections use the same `{ type, info, ... }` objects as `onError`.
 
 ```javascript
-const jsmediatags = require("jsmediatags");
+const jsmediatags = require("@probityrules/jsmediatags");
 
 // read(location) without callbacks
 const tag = await jsmediatags.read("./music-file.mp3");
@@ -114,7 +116,7 @@ The browser build is an **IIFE** that assigns a global `jsmediatags` object:
 </script>
 ```
 
-When installed via npm, bundlers can `require("jsmediatags")` or `import jsmediatags from "jsmediatags"` and resolve the Node build; the `"browser"` export condition points at the minified bundle for browser-targeted builds.
+When installed via npm, bundlers can `require("@probityrules/jsmediatags")` or `import jsmediatags from "@probityrules/jsmediatags"` and resolve the Node build; the `"browser"` export condition points at the minified bundle for browser-targeted builds.
 
 It supports loading files from remote hosts, Blob and File objects:
 
@@ -153,7 +155,7 @@ inputTypeFile.addEventListener("change", function(event) {
 Install the library, then the optional peer dependencies used by the React Native file reader:
 
 ```bash
-npm install jsmediatags
+npm install @probityrules/jsmediatags
 npm install buffer react-native-fs
 ```
 
@@ -162,7 +164,7 @@ npm install buffer react-native-fs
 Usage is the same as in Node.js:
 
 ```js
-const jsmediatags = require('jsmediatags');
+const jsmediatags = require('@probityrules/jsmediatags');
 
 // Callback API
 new jsmediatags.Reader('/path/to/song.mp3')
@@ -344,8 +346,8 @@ New file and tag readers can be implemented by extending the MediaFileReader and
 Types are published with the package. Import the default export and optionally use tag types from the compiled declarations:
 
 ```typescript
-import jsmediatags from "jsmediatags";
-import type { TagType } from "jsmediatags/build/types";
+import jsmediatags from "@probityrules/jsmediatags";
+import type { TagType } from "@probityrules/jsmediatags/types";
 
 const tag: TagType = await jsmediatags.readAsync("./music-file.mp3");
 ```
@@ -422,6 +424,15 @@ Current Implementations:
 * [ID3v2TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/ID3v2TagReader.ts)
 * [MP4TagReader](https://github.com/aadsm/jsmediatags/blob/master/src/MP4TagReader.ts)
 * [FLACTagReader](https://github.com/aadsm/jsmediatags/blob/master/src/FLACTagReader.ts)
+
+### Publishing
+
+The package is published to npm as **`@probityrules/jsmediatags`**. Only distributable artifacts are included (`build/`, `dist/jsmediatags.min.js`, docs); `src/` and `test/` stay in the repository only.
+
+```bash
+npm run build && npm run dist   # prepublishOnly runs this automatically
+npm publish --access public
+```
 
 ### Unit Testing
 

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.0.0] - 2026-06-02
 
+Published to npm as **`@probityrules/jsmediatags`** from [probityrules/jsmediatags](https://github.com/probityrules/jsmediatags).
+
 ### Added
 
 - TypeScript source with published `.d.ts` declarations (`build/jsmediatags.d.ts`).

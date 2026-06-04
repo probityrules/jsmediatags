@@ -558,10 +558,9 @@ var jsmediatags = (() => {
         _parseContentLength(xhr) {
           const contentLength = this._getResponseHeader(xhr, "Content-Length");
           if (contentLength == null) {
-            return contentLength;
-          } else {
-            return parseInt(contentLength, 10);
+            return null;
           }
+          return parseInt(contentLength, 10);
         }
         _parseContentRange(xhr) {
           const contentRange = this._getResponseHeader(xhr, "Content-Range");

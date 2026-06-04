@@ -1,9 +1,13 @@
 .DS_Store
 node_modules
 src
+test
+scripts
+.github
 .gitignore
-browser.js
+jest.config.cjs
+tsconfig.json
+tsconfig.test.json
 publish.sh
-build/__mocks__/
-build/__tests__/
+browser.js
 dist/jsmediatags.js

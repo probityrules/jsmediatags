@@ -1,5 +1,5 @@
 {
-  "name": "jsmediatags",
+  "name": "@probityrules/jsmediatags",
   "version": "4.0.0",
   "description": "Media Tags Reader (ID3, MP4)",
   "author": {
@@ -16,6 +16,11 @@
     {
       "name": "Jesse Ditson",
       "email": "jesse.ditson@gmail.com"
+    },
+    {
+      "name": "Derek Detweiler",
+      "email": "derek.detweiler@gmail.com",
+      "url": "https://github.com/probityrules"
     }
   ],
   "main": "build/jsmediatags.js",
@@ -27,17 +32,24 @@
       "browser": "./dist/jsmediatags.min.js",
       "default": "./build/jsmediatags.js"
     },
+    "./types": {
+      "types": "./build/types.d.ts"
+    },
     "./package.json": "./package.json"
   },
   "files": [
     "build/**/*.js",
     "build/**/*.d.ts",
     "dist/jsmediatags.min.js",
-    "LICENSE.md"
+    "LICENSE.md",
+    "CHANGELOG.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aadsm/jsmediatags.git"
+    "url": "git+https://github.com/probityrules/jsmediatags.git"
   },
   "keywords": [
     "ID3",
@@ -48,9 +60,9 @@
   ],
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/aadsm/jsmediatags/issues"
+    "url": "https://github.com/probityrules/jsmediatags/issues"
   },
-  "homepage": "https://github.com/aadsm/jsmediatags#readme",
+  "homepage": "https://github.com/probityrules/jsmediatags#readme",
   "react-native": {
     "fs": false,
     "./NodeFileReader": false
