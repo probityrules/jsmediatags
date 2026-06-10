@@ -33,26 +33,32 @@ const browserOnlyPlugin = {
   },
 };
 
-const sharedOptions = {
+const bundleOptions = {
   entryPoints: [entryPoint],
   bundle: true,
   platform: "browser",
   target: ["es2015"],
-  format: "iife",
-  globalName: "jsmediatags",
   legalComments: "none",
   plugins: [browserOnlyPlugin],
   logLevel: "info",
+};
+
+const iifeOptions = {
+  ...bundleOptions,
+  format: "iife",
+  globalName: "jsmediatags",
 };
 
 mkdirSync(resolve(rootDir, "dist"), { recursive: true });
 
 const devOutfile = resolve(rootDir, "dist/jsmediatags.js");
 const minOutfile = resolve(rootDir, "dist/jsmediatags.min.js");
+const browserCjsOutfile = resolve(rootDir, "dist/jsmediatags.browser.cjs");
+const browserEsmOutfile = resolve(rootDir, "dist/jsmediatags.browser.mjs");
 
 if (watch) {
   const devContext = await esbuild.context({
-    ...sharedOptions,
+    ...iifeOptions,
     outfile: devOutfile,
     minify: false,
   });
@@ -61,14 +67,28 @@ if (watch) {
   console.log("Watching for browser bundle changes...");
 } else {
   await esbuild.build({
-    ...sharedOptions,
+    ...iifeOptions,
     outfile: devOutfile,
     minify: false,
   });
 
   await esbuild.build({
-    ...sharedOptions,
+    ...iifeOptions,
     outfile: minOutfile,
+    minify: true,
+  });
+
+  await esbuild.build({
+    ...bundleOptions,
+    format: "cjs",
+    outfile: browserCjsOutfile,
+    minify: true,
+  });
+
+  await esbuild.build({
+    ...bundleOptions,
+    format: "esm",
+    outfile: browserEsmOutfile,
     minify: true,
   });
 }

@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.1] - 2026-06-04
+
+### Fixed
+
+- `import jsmediatags from "@probityrules/jsmediatags"` returning `{}` in browser bundlers (Vite, webpack, etc.). The `"browser"` export condition no longer points at the IIFE script bundle; it now resolves proper module builds (`dist/jsmediatags.browser.mjs` / `.cjs`). Use `@probityrules/jsmediatags/browser` for the IIFE global build.
+
 ## [4.0.0] - 2026-06-02
 
 Published to npm as **`@probityrules/jsmediatags`** from [probityrules/jsmediatags](https://github.com/probityrules/jsmediatags).

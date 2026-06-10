@@ -1,6 +1,6 @@
 {
   "name": "@probityrules/jsmediatags",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Media Tags Reader (ID3, MP4)",
   "author": {
     "name": "António Afonso",
@@ -25,13 +25,19 @@
   ],
   "main": "build/jsmediatags.js",
   "types": "build/jsmediatags.d.ts",
-  "browser": "dist/jsmediatags.min.js",
   "exports": {
     ".": {
       "types": "./build/jsmediatags.d.ts",
-      "browser": "./dist/jsmediatags.min.js",
+      "browser": {
+        "import": "./dist/jsmediatags.browser.mjs",
+        "require": "./dist/jsmediatags.browser.cjs",
+        "default": "./dist/jsmediatags.browser.mjs"
+      },
+      "import": "./build/jsmediatags.js",
+      "require": "./build/jsmediatags.js",
       "default": "./build/jsmediatags.js"
     },
+    "./browser": "./dist/jsmediatags.min.js",
     "./types": {
       "types": "./build/types.d.ts"
     },
@@ -41,6 +47,8 @@
     "build/**/*.js",
     "build/**/*.d.ts",
     "dist/jsmediatags.min.js",
+    "dist/jsmediatags.browser.cjs",
+    "dist/jsmediatags.browser.mjs",
     "LICENSE.md",
     "CHANGELOG.md"
   ],

@@ -116,7 +116,7 @@ The browser build is an **IIFE** that assigns a global `jsmediatags` object:
 </script>
 ```
 
-When installed via npm, bundlers can `require("@probityrules/jsmediatags")` or `import jsmediatags from "@probityrules/jsmediatags"` and resolve the Node build; the `"browser"` export condition points at the minified bundle for browser-targeted builds.
+When installed via npm, bundlers can `require("@probityrules/jsmediatags")` or `import jsmediatags from "@probityrules/jsmediatags"`. Node resolves the compiled `build/` entry; browser bundlers resolve `dist/jsmediatags.browser.mjs` / `.cjs` (proper module exports). For a script tag, use `@probityrules/jsmediatags/browser` or copy `dist/jsmediatags.min.js` (IIFE global).
 
 It supports loading files from remote hosts, Blob and File objects:
 
@@ -390,7 +390,7 @@ Run `npm run watch` to automatically recompile the source code whenever a file i
 
 ### Browser Development
 
-Run `npm run dist` to generate browser bundles with esbuild: `dist/jsmediatags.js` (debug) and `dist/jsmediatags.min.js` (production). Both expose a global `jsmediatags` object when loaded via a script tag.
+Run `npm run dist` to generate browser bundles with esbuild: `dist/jsmediatags.js` / `dist/jsmediatags.min.js` (IIFE globals for script tags), plus `dist/jsmediatags.browser.mjs` / `.cjs` (module builds used by bundlers).
 
 Run `npm run dist-watch` to rebuild the browser bundle whenever a source file changes.
 
