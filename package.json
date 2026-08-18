@@ -1,6 +1,6 @@
 {
   "name": "@probityrules/jsmediatags",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Media Tags Reader (ID3, MP4)",
   "author": {
     "name": "António Afonso",
