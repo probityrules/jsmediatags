@@ -1,6 +1,6 @@
 {
   "name": "@probityrules/jsmediatags",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Media Tags Reader (ID3, MP4)",
   "author": {
     "name": "António Afonso",
@@ -97,6 +97,7 @@
     "esbuild": "^0.25.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jest-util": "^29.7.0",
     "ts-jest": "^29.4.0",
     "typescript": "^5.6.3"
   },

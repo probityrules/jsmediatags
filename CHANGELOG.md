@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.4] - 2026-08-18
+
+### Fixed
+
+- Release workflow tests failing on Node 24 / npm 11 with `Cannot find module 'jest-util'`. `jest-util` is now a direct devDependency so `ts-jest` can resolve it when npm nests the Jest 29 copy under `@jest/core`.
+
 ## [4.0.3] - 2026-08-18
 
 ### Added
