@@ -12,11 +12,11 @@ describe("ArrayFileReader", function () {
   var fileReader;
 
   beforeEach(function() {
-    fileReader = new ArrayFileReader(new Buffer("This is a simple file"));
+    fileReader = new ArrayFileReader(Buffer.from("This is a simple file"));
   });
 
   it("should be able to read the right type of files", function() {
-    expect(ArrayFileReader.canReadFile(new Buffer('Test'))).toBe(true);
+    expect(ArrayFileReader.canReadFile(Buffer.from('Test'))).toBe(true);
     expect(ArrayFileReader.canReadFile([10, 24])).toBe(true);
     expect(ArrayFileReader.canReadFile("fakefile")).toBe(false);
     expect(ArrayFileReader.canReadFile("http://localhost")).toBe(false);

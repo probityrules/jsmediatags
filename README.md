@@ -159,7 +159,7 @@ npm install @probityrules/jsmediatags
 npm install buffer react-native-fs
 ```
 
-(`buffer` and `react-native-fs` are declared as optional `peerDependencies` in `package.json`.)
+(`buffer` `^6.0.3` and `react-native-fs` are declared as optional `peerDependencies` in `package.json`.)
 
 Usage is the same as in Node.js:
 

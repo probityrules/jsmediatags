@@ -1,6 +1,6 @@
 {
   "name": "@probityrules/jsmediatags",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Media Tags Reader (ID3, MP4)",
   "author": {
     "name": "António Afonso",
@@ -79,7 +79,7 @@
     "xhr2": "^0.1.4"
   },
   "peerDependencies": {
-    "buffer": "^5.0.8",
+    "buffer": "^6.0.3",
     "react-native-fs": "^2.9.2"
   },
   "peerDependenciesMeta": {
@@ -93,6 +93,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^20.14.0",
+    "buffer": "^6.0.3",
     "esbuild": "^0.25.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",

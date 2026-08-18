@@ -349,7 +349,7 @@ describe("ChunkedFileData", function() {
   });
 
   it("should add TypedArrays", function() {
-    var intArray = new Uint8Array(new Buffer([0x01, 0x02, 0x03, 0x04, 0x05]));
+    var intArray = new Uint8Array(Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05]));
     chunkedFileData.addData(5, intArray);
 
     expect(function() {
