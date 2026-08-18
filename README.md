@@ -429,10 +429,20 @@ Current Implementations:
 
 The package is published to npm as **`@probityrules/jsmediatags`**. Only distributable artifacts are included (`build/`, `dist/jsmediatags.min.js`, docs); `src/` and `test/` stay in the repository only.
 
-```bash
-npm run build && npm run dist   # prepublishOnly runs this automatically
-npm publish --access public
-```
+Releases are automated via [trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC) from GitHub Actions — no long-lived `NPM_TOKEN` is required. When `package.json` version changes on `main`/`master`, the [`release.yml`](.github/workflows/release.yml) workflow builds, tests, publishes to npm, and creates a GitHub release.
+
+**One-time npm setup** (package settings → Trusted publishing → GitHub Actions):
+
+| Field | Value |
+| --- | --- |
+| Organization or user | `probityrules` |
+| Repository | `jsmediatags` |
+| Workflow filename | `release.yml` |
+| Allowed actions | `npm publish` |
+
+After the trusted publisher is saved, bump the version in `package.json`, update `CHANGELOG.md`, merge to `main`/`master`, and the workflow publishes automatically. You can also trigger a manual release from the Actions tab (`workflow_dispatch`).
+
+For local publishes (emergency only), `prepublishOnly` still runs `npm run build && npm run dist` before `npm publish --access public`.
 
 ### Unit Testing
 
