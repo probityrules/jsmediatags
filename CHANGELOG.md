@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-11-04
+
+### Added
+
+- `WebMTagReader`: first-party EBML/WebM reader (via `MediaFileReader`) exposing native Matroska SimpleTags (`TITLE`, `ALBUM`, `LYRICS`, …), shared shortcuts (`title`, `album`, `lyrics`, …), and `WEBVTT` frames with `{ kind, language, name, cues }` for in-band WebVTT tracks.
+
 ## [4.0.4] - 2026-08-18
 
 ### Fixed

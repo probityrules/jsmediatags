@@ -268,6 +268,30 @@ This is an example of the object passed to the `jsmediatags.read`'s `onSuccess` 
 }
 ```
 
+#### WebM
+
+```javascript
+{
+  type: "WebM",
+  tags: {
+    title: "Line title",
+    TITLE: { id: "TITLE", description: "TITLE", data: "Line title" },
+    WEBVTT: {
+      id: "WEBVTT",
+      description: "captions",
+      data: {
+        kind: "CAPTIONS",
+        language: "eng",
+        name: "captions",
+        cues: [{ text: "Hello", timeStamp: 0 }]
+      }
+    }
+  }
+}
+```
+
+Native Matroska SimpleTags use uppercase names; timed WebVTT tracks are exposed as `WEBVTT` (array when multiple). Shortcuts such as `title` / `album` / `lyrics` map to those SimpleTags (not to `WEBVTT`).
+
 The `tags` property includes all tags that were found or specified to be read.
 Since each tag type (e.g.: ID3, MP4) uses different tag names for the same type of data (e.g.: the artist name) the most common tags are also available under human readable names (aka shortcuts). In this example, `artist` will point to `TPE1.data`, `album` to `TALB.data` and so forth.
 
