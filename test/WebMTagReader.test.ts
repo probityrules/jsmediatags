@@ -1,3 +1,5 @@
+export {}; // TS module scope (avoids global const clashes with other tests)
+
 jest.autoMockOff();
 
 const WebMTagReader = require('../src/WebMTagReader');
