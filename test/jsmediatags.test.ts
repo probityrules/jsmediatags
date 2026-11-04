@@ -15,6 +15,7 @@ const ID3v1TagReader = require("../src/ID3v1TagReader");
 const ID3v2TagReader = require("../src/ID3v2TagReader");
 const MP4TagReader = require("../src/MP4TagReader");
 const FLACTagReader = require("../src/FLACTagReader");
+const WebMTagReader = require("../src/WebMTagReader");
 
 describe("jsmediatags", function () {
   useFakeAsyncTimers();
@@ -25,6 +26,7 @@ describe("jsmediatags", function () {
     jsmediatags.Config.removeTagReader(ID3v1TagReader);
     jsmediatags.Config.removeTagReader(MP4TagReader);
     jsmediatags.Config.removeTagReader(FLACTagReader);
+    jsmediatags.Config.removeTagReader(WebMTagReader);
     // Reset auto mock to its original state.
     NodeFileReader.canReadFile = jest.fn();
     NodeFileReader.prototype.init = jest.fn()
